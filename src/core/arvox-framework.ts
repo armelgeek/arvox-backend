@@ -516,7 +516,7 @@ export class ArvoxFramework {
       return c.json({
         name: this.config.appName || 'Arvox API',
         version: this.config.version || '1.0.0',
-        framework: '@arvox/backend-framework',
+  framework: 'arvox-backend',
         frameworkVersion: '1.0.0',
         environment: this.config.environment || 'development',
         uptime: process.uptime(),

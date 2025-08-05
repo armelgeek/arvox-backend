@@ -1,6 +1,6 @@
-# Guide de Simplification des Routes - @arvox/backend-framework
+# Guide de Simplification des Routes - arvox-backend
 
-Ce guide présente les différentes approches pour simplifier la création de routes OpenAPI dans le framework @arvox/backend-framework.
+Ce guide présente les différentes approches pour simplifier la création de routes OpenAPI dans le framework arvox-backend.
 
 ## 🎯 Objectif
 
@@ -83,7 +83,7 @@ this.controller.openapi(
 ### ✅ Approche 1 : Méthodes BaseController
 
 ```typescript
-import { BaseController } from '@arvox/backend-framework'
+import { BaseController } from 'arvox-backend'
 
 // 15 lignes pour la même route POST
 this.createPostRoute(
@@ -115,7 +115,7 @@ this.createPostRoute(
 ### ✅ Approche 2 : Route Utilities
 
 ```typescript
-import { Route } from '@arvox/backend-framework'
+import { Route } from 'arvox-backend'
 
 // 12 lignes pour la même route POST
 this.controller.openapi(
@@ -253,7 +253,7 @@ Route.delete(path, { tag?, summary?, description?, security? })
 ## 🛠️ Helpers pour les Schémas
 
 ```typescript
-import { createSchema, updateSchema, entitySchema, CommonSchemas } from '@arvox/backend-framework'
+import { createSchema, updateSchema, entitySchema, CommonSchemas } from 'arvox-backend'
 
 // Schémas courants
 const email = CommonSchemas.email
@@ -345,4 +345,4 @@ Ces simplifications permettent de :
 - ✅ **Réduire les erreurs** de configuration
 - ✅ **Conserver tous les avantages** d'OpenAPI et Hono
 
-Le framework @arvox/backend-framework vous offre maintenant une API simple et puissante pour créer des routes modernes avec une documentation automatique !
+Le framework arvox-backend vous offre maintenant une API simple et puissante pour créer des routes modernes avec une documentation automatique !

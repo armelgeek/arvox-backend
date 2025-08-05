@@ -1,4 +1,4 @@
-# @arvox/backend-framework
+# arvox-backend
 
 Un framework backend TypeScript moderne basé sur Hono, conçu selon l'architecture hexagonale pour créer des APIs robustes et maintenables.
 
@@ -29,11 +29,11 @@ npm run dev
 ## 📦 Installation manuelle
 
 ```bash
-npm install @armelwanes/backend-framework
+npm install arvox-backend
 # ou
-bun add @armelwanes/backend-framework
+bun add arvox-backend
 # ou  
-pnpm add @armelwanes/backend-framework
+pnpm add arvox-backend
 ```
 
 ## 🚀 Simplification des routes
@@ -43,7 +43,7 @@ Le framework offre **3 approches** pour créer des routes avec **60-70% moins de
 ### ✨ Méthode 1 : BaseController simplifié (Recommandé)
 
 ```typescript
-import { BaseController } from '@armelwanes/backend-framework';
+import { BaseController } from 'arvox-backend';
 
 export class UserController extends BaseController {
   constructor() {
@@ -90,7 +90,7 @@ export class UserController extends BaseController {
 ### ⚡ Méthode 2 : Utilitaires Route
 
 ```typescript
-import { Route } from '@armelwanes/backend-framework/utils';
+import { Route } from 'arvox-backend/utils';
 
 // Configuration encore plus simple - style fonctionnel
 const userRoutes = [
@@ -228,9 +228,9 @@ Le projet généré inclut :
 ## 📦 Installation
 
 ```bash
-npm install @arvox/backend-framework
+npm install arvox-backend
 # ou
-bun add @arvox/backend-framework
+bun add arvox-backend
 ```
 
 ## 🏗️ Architecture
@@ -247,7 +247,7 @@ src/
 ### 1. Configuration de Base
 
 ```typescript
-import { ArvoxFramework } from '@arvox/backend-framework'
+import { ArvoxFramework } from 'arvox-backend'
 
 const framework = new ArvoxFramework({
   appName: 'Mon API',
@@ -272,7 +272,7 @@ await framework.start()
 ### 2. Créer un Use Case
 
 ```typescript
-import { BaseUseCase, ActivityType } from '@arvox/backend-framework'
+import { BaseUseCase, ActivityType } from 'arvox-backend'
 
 type CreateUserParams = {
   name: string
@@ -308,7 +308,7 @@ export class CreateUserUseCase extends BaseUseCase<CreateUserParams, CreateUserR
 ### 3. Créer un Controller
 
 ```typescript
-import { BaseController, Route } from '@arvox/backend-framework'
+import { BaseController, Route } from 'arvox-backend'
 import { z } from 'zod'
 
 // Schémas simplifiés
@@ -451,7 +451,7 @@ export class UserController extends BaseController {
 ### 4. Créer un Repository
 
 ```typescript
-import { BaseRepository } from '@arvox/backend-framework'
+import { BaseRepository } from 'arvox-backend'
 
 export class UserRepository extends BaseRepository<User, CreateUserData, UpdateUserData> {
   async findById(id: string): Promise<User | null> {
@@ -483,7 +483,7 @@ export class UserRepository extends BaseRepository<User, CreateUserData, UpdateU
 ### 5. Créer un Module
 
 ```typescript
-import { IModule } from '@arvox/backend-framework'
+import { IModule } from 'arvox-backend'
 import { OpenAPIHono } from '@hono/zod-openapi'
 
 export class UserModule implements IModule {
@@ -512,7 +512,7 @@ export class UserModule implements IModule {
 ### 6. Assemblage Final
 
 ```typescript
-import { ArvoxFramework } from '@arvox/backend-framework'
+import { ArvoxFramework } from 'arvox-backend'
 
 // Injection de dépendances
 const userRepository = new UserRepository()
@@ -598,7 +598,7 @@ this.controller.openapi(
 ### Validation
 
 ```typescript
-import { ValidationUtil } from '@arvox/backend-framework'
+import { ValidationUtil } from 'arvox-backend'
 
 // Schémas prédéfinis
 const user = ValidationUtil.validate(data, z.object({
@@ -613,7 +613,7 @@ const fileSchema = ValidationUtil.createFileSchema(['image/jpeg', 'image/png'], 
 ### Pagination
 
 ```typescript
-import { PaginationUtil } from '@arvox/backend-framework'
+import { PaginationUtil } from 'arvox-backend'
 
 const paginationUtil = new PaginationUtil()
 const { page, limit, skip } = paginationUtil.extractFromContext(c)
@@ -623,7 +623,7 @@ const result = paginationUtil.createResponse(items, total, page, limit)
 ### Réponses Standardisées
 
 ```typescript
-import { ResponseUtil } from '@arvox/backend-framework'
+import { ResponseUtil } from 'arvox-backend'
 
 const responseUtil = new ResponseUtil()
 

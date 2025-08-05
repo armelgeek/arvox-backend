@@ -9,7 +9,7 @@ const program = new Command();
 
 program
   .name('create-arvox-app')
-  .description('CLI pour créer des projets avec @armelwanes/backend-framework')
+  .description('CLI pour créer des projets avec arvox-backend')
   .version('1.0.0');
 
 program
@@ -53,7 +53,7 @@ async function generateBasicTemplate(projectDir, projectName) {
   const packageJson = {
     name: projectName,
     version: '1.0.0',
-        description: 'API créée avec @armelwanes/backend-framework',
+  description: 'API créée avec arvox-backend',
     main: 'dist/index.js',
     scripts: {
       dev: 'tsx watch src/index.ts',
@@ -61,7 +61,7 @@ async function generateBasicTemplate(projectDir, projectName) {
       start: 'node dist/index.js'
     },
     dependencies: {
-      '@armelwanes/backend-framework': '^1.0.0',
+  'arvox-backend': '^1.0.0',
       '@hono/node-server': '^1.8.2'
     },
     devDependencies: {
@@ -106,13 +106,13 @@ async function generateBasicTemplate(projectDir, projectName) {
   
   // index.ts principal
   const indexTs = `import { serve } from '@hono/node-server';
-import { ArvoxFramework } from '@armelwanes/backend-framework';
+import { ArvoxFramework } from 'arvox-backend';
 import { HealthController } from './controllers/health.controller';
 
 const app = new ArvoxFramework({
   title: '${projectName} API',
   version: '1.0.0',
-  description: 'API créée avec @arvox/backend-framework'
+  description: 'API créée avec arvox-backend'
 });
 
 // Enregistrer les contrôleurs
@@ -134,7 +134,7 @@ serve({
   await fs.mkdir(path.join(projectDir, 'src', 'controllers'), { recursive: true });
   
   // HealthController
-  const healthController = `import { BaseController } from '@armelwanes/backend-framework';
+  const healthController = `import { BaseController } from 'arvox-backend';
 import { z } from 'zod';
 
 export class HealthController extends BaseController {
@@ -179,7 +179,7 @@ export class HealthController extends BaseController {
   // README.md
   const readme = `# ${projectName}
 
-API créée avec [@armelwanes/backend-framework](https://github.com/armelgeek/arvox-backend).
+API créée avec [arvox-backend](https://github.com/armelgeek/arvox-backend).
 
 ## Démarrage rapide
 

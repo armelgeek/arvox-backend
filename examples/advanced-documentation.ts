@@ -295,7 +295,7 @@ async function startAdvancedExample() {
   const framework = new ArvoxFramework({
     appName: 'Advanced API with Complete Documentation',
     version: '2.0.0',
-    description: 'Exemple d\'API avec documentation OpenAPI complète utilisant @arvox/backend-framework',
+  description: 'Exemple d\'API avec documentation OpenAPI complète utilisant arvox-backend',
     port: 3001,
     environment: 'development',
     cors: {

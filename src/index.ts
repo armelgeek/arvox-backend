@@ -15,4 +15,4 @@ export { ArvoxFramework } from './core/arvox-framework';
 
 // Version and metadata
 export const FRAMEWORK_VERSION = '1.0.0';
-export const FRAMEWORK_NAME = '@arvox/backend-framework';
+export const FRAMEWORK_NAME = 'arvox-backend';

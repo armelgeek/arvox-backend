@@ -1,7 +1,7 @@
 // Test simple avec JavaScript pour éviter les problèmes de modules ES
 import { ArvoxFramework } from '../dist/index.js'
 
-console.log('🧪 Test du framework @arvox/backend-framework')
+console.log('🧪 Test du framework arvox-backend')
 console.log('ArvoxFramework:', typeof ArvoxFramework)
 
 try {

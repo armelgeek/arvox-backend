@@ -52,7 +52,7 @@ export const defaultOpenAPIConfig: OpenAPIConfig = {
   description: `
 # API Documentation
 
-Cette API a été construite avec le framework **@arvox/backend-framework**, 
+Cette API a été construite avec le framework **arvox-backend**, 
 utilisant une architecture hexagonale (Clean Architecture) pour une séparation 
 claire des responsabilités.
 
