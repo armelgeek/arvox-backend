@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { createRoute } from '@hono/zod-openapi'
+import { z } from 'zod';
+import { createRoute } from '@hono/zod-openapi';
 
 /**
  * Utilitaires pour simplifier la création de routes OpenAPI
@@ -64,7 +64,7 @@ export class RouteBuilder {
         400: this.errorResponse('Validation error'),
         ...(options.security ? { 401: this.errorResponse('Unauthorized') } : {})
       }
-    })
+    });
   }
 
   /**
@@ -114,7 +114,7 @@ export class RouteBuilder {
         400: this.errorResponse('Bad request'),
         ...(options.security ? { 401: this.errorResponse('Unauthorized') } : {})
       }
-    })
+    });
   }
 
   /**
@@ -151,7 +151,7 @@ export class RouteBuilder {
         404: this.errorResponse('Resource not found'),
         ...(options.security ? { 401: this.errorResponse('Unauthorized') } : {})
       }
-    })
+    });
   }
 
   /**
@@ -196,7 +196,7 @@ export class RouteBuilder {
         404: this.errorResponse('Resource not found'),
         ...(options.security ? { 401: this.errorResponse('Unauthorized') } : {})
       }
-    })
+    });
   }
 
   /**
@@ -234,7 +234,7 @@ export class RouteBuilder {
         404: this.errorResponse('Resource not found'),
         ...(options.security ? { 401: this.errorResponse('Unauthorized') } : {})
       }
-    })
+    });
   }
 
   /**
@@ -251,7 +251,7 @@ export class RouteBuilder {
           })
         }
       }
-    }
+    };
   }
 }
 
@@ -264,7 +264,7 @@ export const Route = {
   getById: RouteBuilder.getById,
   put: RouteBuilder.put,
   delete: RouteBuilder.delete
-}
+};
 
 // Utilitaires pour les schémas courants
 export const CommonSchemas = {
@@ -277,20 +277,20 @@ export const CommonSchemas = {
     createdAt: z.date(),
     updatedAt: z.date()
   })
-}
+};
 
 /**
  * Helper pour créer des schémas de création (sans id, timestamps)
  */
 export function createSchema<T extends z.ZodRawShape>(shape: T) {
-  return z.object(shape)
+  return z.object(shape);
 }
 
 /**
  * Helper pour créer des schémas de mise à jour (partiels)
  */
 export function updateSchema<T extends z.ZodRawShape>(shape: T) {
-  return z.object(shape).partial()
+  return z.object(shape).partial();
 }
 
 /**
@@ -301,5 +301,5 @@ export function entitySchema<T extends z.ZodRawShape>(shape: T) {
     id: CommonSchemas.id,
     ...shape,
     ...CommonSchemas.timestamps.shape
-  })
+  });
 }

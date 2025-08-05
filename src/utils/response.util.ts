@@ -15,7 +15,7 @@ export class ResponseUtil {
         data
       },
       status
-    }
+    };
   }
 
   /**
@@ -25,14 +25,14 @@ export class ResponseUtil {
    * @returns Response object with JSON and status
    */
   error(error: string | Error, status: number = 400) {
-    const message = error instanceof Error ? error.message : error
+    const message = error instanceof Error ? error.message : error;
     return {
       json: {
         success: false,
         error: message
       },
       status
-    }
+    };
   }
 
   /**
@@ -51,7 +51,7 @@ export class ResponseUtil {
     limit: number,
     status: number = 200
   ) {
-    const totalPages = Math.ceil(total / limit)
+    const totalPages = Math.ceil(total / limit);
     
     return {
       json: {
@@ -69,7 +69,7 @@ export class ResponseUtil {
         }
       },
       status
-    }
+    };
   }
 
   /**
@@ -86,7 +86,7 @@ export class ResponseUtil {
         details: errors
       },
       status
-    }
+    };
   }
 
   /**
@@ -101,7 +101,7 @@ export class ResponseUtil {
         error: `${resource} not found`
       },
       status: 404
-    }
+    };
   }
 
   /**
@@ -116,7 +116,7 @@ export class ResponseUtil {
         error: message
       },
       status: 401
-    }
+    };
   }
 
   /**
@@ -131,7 +131,7 @@ export class ResponseUtil {
         error: message
       },
       status: 403
-    }
+    };
   }
 
   /**
@@ -146,7 +146,7 @@ export class ResponseUtil {
         error: message
       },
       status: 409
-    }
+    };
   }
 
   /**
@@ -161,6 +161,6 @@ export class ResponseUtil {
         error: message
       },
       status: 500
-    }
+    };
   }
 }

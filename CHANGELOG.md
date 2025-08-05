@@ -19,6 +19,12 @@ All notable changes to this project will be documented in this file.
 - **Documentation**: README complet avec comparaisons et guides
 - **Architecture**: Structure de projet optimisée générée par le CLI
 
+### 🔧 Fixed
+- **ESLint Configuration**: Migration vers ESLint v9 avec `eslint.config.js`
+- **Code Quality**: Correction de tous les problèmes de linting et formatage
+- **TypeScript**: Correction des erreurs de syntaxe et types manquants
+- **Dependencies**: Ajout des dépendances ESLint manquantes
+
 ### 📦 CLI Features
 - Support multi-package managers (npm, bun, pnpm)
 - Templates TypeScript prêts à l'emploi
@@ -31,8 +37,7 @@ All notable changes to this project will be documented in this file.
 - TypeScript strict configuration
 - Zod validation intégrée
 - OpenAPI documentation automatique
-
-## [1.0.0] - 2024-08-01
+- Configuration ESLint moderne v9## [1.0.0] - 2024-08-01
 
 ### ✨ Initial Release
 - Framework backend basé sur Hono

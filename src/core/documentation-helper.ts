@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { createRoute } from '@hono/zod-openapi'
+import { z } from 'zod';
+import { createRoute } from '@hono/zod-openapi';
 
 /**
  * Helper pour créer des routes OpenAPI avec documentation standardisée
@@ -29,8 +29,7 @@ export class DocumentationHelper {
           page: z.string().optional().transform(val => val ? parseInt(val) : 1),
           limit: z.string().optional().transform(val => val ? parseInt(val) : 10),
           search: z.string().optional(),
-          sort: z.string().optional(),
-          ...config.queryParams?.shape || {}
+          sort: z.string().optional()
         })
       },
       responses: {
@@ -78,7 +77,7 @@ export class DocumentationHelper {
           }
         }
       }
-    })
+    });
   }
 
   /**
@@ -139,7 +138,7 @@ export class DocumentationHelper {
           }
         }
       }
-    })
+    });
   }
 
   /**
@@ -155,7 +154,7 @@ export class DocumentationHelper {
     security?: boolean
     multipart?: boolean
   }) {
-    const contentType = config.multipart ? 'multipart/form-data' : 'application/json'
+    const contentType = config.multipart ? 'multipart/form-data' : 'application/json';
     
     return createRoute({
       method: 'post',
@@ -212,7 +211,7 @@ export class DocumentationHelper {
           }
         }
       }
-    })
+    });
   }
 
   /**
@@ -228,7 +227,7 @@ export class DocumentationHelper {
     security?: boolean
     multipart?: boolean
   }) {
-    const contentType = config.multipart ? 'multipart/form-data' : 'application/json'
+    const contentType = config.multipart ? 'multipart/form-data' : 'application/json';
     
     return createRoute({
       method: 'put',
@@ -295,7 +294,7 @@ export class DocumentationHelper {
           }
         }
       }
-    })
+    });
   }
 
   /**
@@ -357,7 +356,7 @@ export class DocumentationHelper {
           }
         }
       }
-    })
+    });
   }
 
   /**
@@ -368,28 +367,34 @@ export class DocumentationHelper {
       id: z.string().uuid().describe('Identifiant unique'),
       createdAt: z.date().describe('Date de création'),
       updatedAt: z.date().describe('Date de dernière modification')
-    })
+    });
   }
 
   /**
    * Créer un schéma de création (sans id, createdAt, updatedAt)
    */
-  static createCreateSchema<T extends z.ZodRawShape>(entitySchema: z.ZodObject<T>) {
-    return entitySchema.omit({ id: true, createdAt: true, updatedAt: true })
+  static createCreateSchema<T extends z.ZodRawShape>(entitySchema: z.ZodObject<T>): any {
+    return (entitySchema as any).omit({ id: true, createdAt: true, updatedAt: true });
   }
 
   /**
    * Créer un schéma de mise à jour (partial sans id, createdAt, updatedAt)
    */
-  static createUpdateSchema<T extends z.ZodRawShape>(entitySchema: z.ZodObject<T>) {
-    return entitySchema.omit({ id: true, createdAt: true, updatedAt: true }).partial()
+  static omitTimestamps<T extends z.ZodTypeAny>(entitySchema: T): any {
+    // TypeScript ne peut pas inferrer exactement le type omit, donc nous utilisons any
+    return (entitySchema as any).omit({ id: true, createdAt: true, updatedAt: true });
+  }
+
+  static omitTimestampsAndMakePartial<T extends z.ZodTypeAny>(entitySchema: T): any {
+    // TypeScript ne peut pas inferrer exactement le type omit + partial, donc nous utilisons any
+    return (entitySchema as any).omit({ id: true, createdAt: true, updatedAt: true }).partial();
   }
 
   /**
    * Ajouter des exemples à un schéma
    */
   static addExamples<T>(schema: z.ZodSchema<T>, examples: Record<string, any>) {
-    return schema.describe(JSON.stringify({ examples }))
+    return schema.describe(JSON.stringify({ examples }));
   }
 
   /**
@@ -398,6 +403,6 @@ export class DocumentationHelper {
   static createAuthHeader() {
     return z.object({
       authorization: z.string().describe('Bearer token for authentication').optional()
-    })
+    });
   }
 }

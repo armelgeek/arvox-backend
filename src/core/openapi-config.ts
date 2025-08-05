@@ -158,7 +158,7 @@ Toutes les réponses suivent ce format standard:
       }
     }
   }
-}
+};
 
 /**
  * Schémas de réponse communs pour OpenAPI
@@ -316,7 +316,7 @@ export const commonSchemas = {
     },
     required: ['id', 'createdAt', 'updatedAt']
   }
-}
+};
 
 /**
  * Paramètres de requête communs
@@ -387,4 +387,4 @@ export const commonParameters = {
       example: '123e4567-e89b-12d3-a456-426614174000'
     }
   }
-}
+};

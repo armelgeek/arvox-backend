@@ -1,24 +1,24 @@
-import { OpenAPIHono } from '@hono/zod-openapi'
-import { createRoute } from '@hono/zod-openapi'
-import { z } from 'zod'
-import { IController } from '../interfaces/controller.interface'
-import { ResponseUtil } from '../utils/response.util'
-import { PaginationUtil } from '../utils/pagination.util'
+import { OpenAPIHono } from '@hono/zod-openapi';
+import { createRoute } from '@hono/zod-openapi';
+import { z } from 'zod';
+import { IController } from '../interfaces/controller.interface';
+import { ResponseUtil } from '../utils/response.util';
+import { PaginationUtil } from '../utils/pagination.util';
 
 /**
  * Base controller class providing common HTTP functionality
  * All controllers should extend this class for consistent behavior
  */
 export abstract class BaseController implements IController {
-  public controller: OpenAPIHono
-  protected responseUtil: ResponseUtil
-  protected paginationUtil: PaginationUtil
+  public controller: OpenAPIHono;
+  protected responseUtil: ResponseUtil;
+  protected paginationUtil: PaginationUtil;
 
   constructor() {
-    this.controller = new OpenAPIHono()
-    this.responseUtil = new ResponseUtil()
-    this.paginationUtil = new PaginationUtil()
-    this.initRoutes()
+    this.controller = new OpenAPIHono();
+    this.responseUtil = new ResponseUtil();
+    this.paginationUtil = new PaginationUtil();
+    this.initRoutes();
   }
 
   /**
@@ -34,7 +34,7 @@ export abstract class BaseController implements IController {
    * @returns Formatted success response
    */
   protected success<T>(data: T, status: number = 200) {
-    return this.responseUtil.success(data, status)
+    return this.responseUtil.success(data, status);
   }
 
   /**
@@ -44,7 +44,7 @@ export abstract class BaseController implements IController {
    * @returns Formatted error response
    */
   protected error(error: string | Error, status: number = 400) {
-    return this.responseUtil.error(error, status)
+    return this.responseUtil.error(error, status);
   }
 
   /**
@@ -63,7 +63,7 @@ export abstract class BaseController implements IController {
     limit: number,
     status: number = 200
   ) {
-    return this.responseUtil.paginated(items, total, page, limit, status)
+    return this.responseUtil.paginated(items, total, page, limit, status);
   }
 
   /**
@@ -72,7 +72,7 @@ export abstract class BaseController implements IController {
    * @returns Pagination parameters with defaults
    */
   protected getPaginationParams(c: any): { page: number; limit: number; skip: number } {
-    return this.paginationUtil.extractFromContext(c)
+    return this.paginationUtil.extractFromContext(c);
   }
 
   /**
@@ -84,11 +84,11 @@ export abstract class BaseController implements IController {
    */
   protected validateFile(file: File, allowedTypes: string[], maxSize: number): void {
     if (!allowedTypes.includes(file.type)) {
-      throw new Error(`File type not allowed. Accepted types: ${allowedTypes.join(', ')}`)
+      throw new Error(`File type not allowed. Accepted types: ${allowedTypes.join(', ')}`);
     }
 
     if (file.size > maxSize) {
-      throw new Error(`File size exceeds limit of ${maxSize / 1024 / 1024}MB`)
+      throw new Error(`File size exceeds limit of ${maxSize / 1024 / 1024}MB`);
     }
   }
 
@@ -98,25 +98,25 @@ export abstract class BaseController implements IController {
    * @returns Promise with form data object
    */
   protected async extractFormData(c: any): Promise<{ [key: string]: any }> {
-    const body = await c.req.parseBody()
-    const formData: { [key: string]: any } = {}
+    const body = await c.req.parseBody();
+    const formData: { [key: string]: any } = {};
 
     for (const [key, value] of Object.entries(body)) {
       if (value instanceof File) {
-        formData[key] = value
+        formData[key] = value;
       } else if (typeof value === 'string') {
         // Try to parse JSON strings
         try {
-          formData[key] = JSON.parse(value)
+          formData[key] = JSON.parse(value);
         } catch {
-          formData[key] = value
+          formData[key] = value;
         }
       } else {
-        formData[key] = value
+        formData[key] = value;
       }
     }
 
-    return formData
+    return formData;
   }
 
   /**
@@ -125,7 +125,7 @@ export abstract class BaseController implements IController {
    * @returns User information or null if not authenticated
    */
   protected getAuthenticatedUser(c: any): any | null {
-    return c.get('user') || null
+    return c.get('user') || null;
   }
 
   /**
@@ -135,10 +135,10 @@ export abstract class BaseController implements IController {
    * @returns Boolean indicating if user has required role
    */
   protected hasRole(c: any, requiredRoles: string[]): boolean {
-    const user = this.getAuthenticatedUser(c)
-    if (!user || !user.role) return false
+    const user = this.getAuthenticatedUser(c);
+    if (!user || !user.role) return false;
 
-    return requiredRoles.includes(user.role.name)
+    return requiredRoles.includes(user.role.name);
   }
 
   /**
@@ -194,12 +194,12 @@ export abstract class BaseController implements IController {
         400: this.getErrorResponse('Validation error'),
         ...(options?.security ? { 401: this.getErrorResponse('Unauthorized') } : {})
       }
-    })
+    });
 
     this.controller.openapi(route, async (c:any) => {
-      const body = c.req.valid('json')
-      return await handler(c, body)
-    })
+      const body = c.req.valid('json');
+      return await handler(c, body);
+    });
   }
 
   /**
@@ -261,12 +261,12 @@ export abstract class BaseController implements IController {
         400: this.getErrorResponse('Bad request'),
         ...(options?.security ? { 401: this.getErrorResponse('Unauthorized') } : {})
       }
-    })
+    });
 
     this.controller.openapi(route, async (c) => {
-      const query = c.req.valid('query')
-      return await handler(c, query)
-    })
+      const query = c.req.valid('query');
+      return await handler(c, query);
+    });
   }
 
   /**
@@ -315,12 +315,12 @@ export abstract class BaseController implements IController {
         404: this.getErrorResponse('Resource not found'),
         ...(options?.security ? { 401: this.getErrorResponse('Unauthorized') } : {})
       }
-    })
+    });
 
     this.controller.openapi(route, async (c) => {
-      const { id } = c.req.valid('param')
-      return await handler(c, id)
-    })
+      const { id } = c.req.valid('param');
+      return await handler(c, id);
+    });
   }
 
   /**
@@ -379,13 +379,13 @@ export abstract class BaseController implements IController {
         404: this.getErrorResponse('Resource not found'),
         ...(options?.security ? { 401: this.getErrorResponse('Unauthorized') } : {})
       }
-    })
+    });
 
     this.controller.openapi(route, async (c:any) => {
-      const { id } = c.req.valid('param')
-      const body = c.req.valid('json')
-      return await handler(c, id, body)
-    })
+      const { id } = c.req.valid('param');
+      const body = c.req.valid('json');
+      return await handler(c, id, body);
+    });
   }
 
   /**
@@ -435,26 +435,26 @@ export abstract class BaseController implements IController {
         404: this.getErrorResponse('Resource not found'),
         ...(options?.security ? { 401: this.getErrorResponse('Unauthorized') } : {})
       }
-    })
+    });
 
     this.controller.openapi(route, async (c) => {
-      const { id } = c.req.valid('param')
-      return await handler(c, id)
-    })
+      const { id } = c.req.valid('param');
+      return await handler(c, id);
+    });
   }
 
   /**
    * Get default tag for routes (can be overridden in child classes)
    */
   protected getDefaultTag(): string {
-    return this.constructor.name.replace('Controller', '')
+    return this.constructor.name.replace('Controller', '');
   }
 
   /**
    * Get resource name for documentation (can be overridden in child classes)
    */
   protected getResourceName(): string {
-    return this.getDefaultTag().toLowerCase()
+    return this.getDefaultTag().toLowerCase();
   }
 
   /**
@@ -471,6 +471,6 @@ export abstract class BaseController implements IController {
           })
         }
       }
-    }
+    };
   }
 }

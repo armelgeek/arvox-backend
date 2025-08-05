@@ -1,26 +1,26 @@
-import { OpenAPIHono } from '@hono/zod-openapi'
-import { serve } from '@hono/node-server'
-import { swaggerUI } from '@hono/swagger-ui'
-import { IModule } from '../interfaces/module.interface'
-import { IService } from '../interfaces/service.interface'
-import { FrameworkConfig } from '../types/config.type'
-import { defaultOpenAPIConfig, commonSchemas, OpenAPIConfig } from './openapi-config'
+import { OpenAPIHono } from '@hono/zod-openapi';
+import { serve } from '@hono/node-server';
+import { swaggerUI } from '@hono/swagger-ui';
+import { IModule } from '../interfaces/module.interface';
+import { IService } from '../interfaces/service.interface';
+import { FrameworkConfig } from '../types/config.type';
+import { defaultOpenAPIConfig, OpenAPIConfig } from './openapi-config';
 
 /**
  * Main framework class that orchestrates the entire application
  * Handles module registration, service initialization, and server setup
  */
 export class ArvoxFramework {
-  private app: OpenAPIHono
-  private modules: Map<string, IModule> = new Map()
-  private services: Map<string, IService> = new Map()
-  private config: FrameworkConfig
-  private isInitialized: boolean = false
+  private app: OpenAPIHono;
+  private modules: Map<string, IModule> = new Map();
+  private services: Map<string, IService> = new Map();
+  private config: FrameworkConfig;
+  private isInitialized: boolean = false;
 
   constructor(config: FrameworkConfig) {
-    this.config = config
-    this.app = new OpenAPIHono()
-    this.setupOpenAPI()
+    this.config = config;
+    this.app = new OpenAPIHono();
+    this.setupOpenAPI();
   }
 
   /**
@@ -41,10 +41,10 @@ export class ArvoxFramework {
           description: this.config.environment || 'Development server'
         }
       ]
-    })
+    });
 
     // Add Swagger UI
-    this.app.get('/docs', swaggerUI({ url: '/openapi.json' }))
+    this.app.get('/docs', swaggerUI({ url: '/openapi.json' }));
   }
 
   /**
@@ -54,19 +54,19 @@ export class ArvoxFramework {
    */
   registerModule(module: IModule): ArvoxFramework {
     if (this.isInitialized) {
-      throw new Error('Cannot register modules after framework initialization')
+      throw new Error('Cannot register modules after framework initialization');
     }
 
-    const moduleName = module.getName()
+    const moduleName = module.getName();
     
     if (this.modules.has(moduleName)) {
-      throw new Error(`Module '${moduleName}' is already registered`)
+      throw new Error(`Module '${moduleName}' is already registered`);
     }
 
-    this.modules.set(moduleName, module)
-    console.log(`Module '${moduleName}' registered`)
+    this.modules.set(moduleName, module);
+    console.log(`Module '${moduleName}' registered`);
     
-    return this
+    return this;
   }
 
   /**
@@ -76,19 +76,19 @@ export class ArvoxFramework {
    */
   registerService(service: IService): ArvoxFramework {
     if (this.isInitialized) {
-      throw new Error('Cannot register services after framework initialization')
+      throw new Error('Cannot register services after framework initialization');
     }
 
-    const serviceName = service.getName()
+    const serviceName = service.getName();
     
     if (this.services.has(serviceName)) {
-      throw new Error(`Service '${serviceName}' is already registered`)
+      throw new Error(`Service '${serviceName}' is already registered`);
     }
 
-    this.services.set(serviceName, service)
-    console.log(`Service '${serviceName}' registered`)
+    this.services.set(serviceName, service);
+    console.log(`Service '${serviceName}' registered`);
     
-    return this
+    return this;
   }
 
   /**
@@ -97,7 +97,7 @@ export class ArvoxFramework {
    * @returns Service instance or undefined
    */
   getService<T extends IService>(name: string): T | undefined {
-    return this.services.get(name) as T
+    return this.services.get(name) as T;
   }
 
   /**
@@ -106,7 +106,7 @@ export class ArvoxFramework {
    * @returns Module instance or undefined
    */
   getModule<T extends IModule>(name: string): T | undefined {
-    return this.modules.get(name) as T
+    return this.modules.get(name) as T;
   }
 
   /**
@@ -114,55 +114,55 @@ export class ArvoxFramework {
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) {
-      throw new Error('Framework is already initialized')
+      throw new Error('Framework is already initialized');
     }
 
-    console.log('Initializing Arvox Framework...')
+    console.log('Initializing Arvox Framework...');
 
     // Initialize services first
-    console.log(`Initializing ${this.services.size} services...`)
+    console.log(`Initializing ${this.services.size} services...`);
     for (const [name, service] of this.services) {
       try {
-        await service.initialize()
-        console.log(`✓ Service '${name}' initialized`)
+        await service.initialize();
+        console.log(`✓ Service '${name}' initialized`);
       } catch (error) {
-        console.error(`✗ Failed to initialize service '${name}':`, error)
-        throw error
+        console.error(`✗ Failed to initialize service '${name}':`, error);
+        throw error;
       }
     }
 
     // Initialize modules
-    console.log(`Initializing ${this.modules.size} modules...`)
+    console.log(`Initializing ${this.modules.size} modules...`);
     for (const [name, module] of this.modules) {
       try {
-        await module.initialize()
-        console.log(`✓ Module '${name}' initialized`)
+        await module.initialize();
+        console.log(`✓ Module '${name}' initialized`);
       } catch (error) {
-        console.error(`✗ Failed to initialize module '${name}':`, error)
-        throw error
+        console.error(`✗ Failed to initialize module '${name}':`, error);
+        throw error;
       }
     }
 
     // Register module routes
-    console.log('Registering module routes...')
+    console.log('Registering module routes...');
     for (const [name, module] of this.modules) {
       try {
-        module.registerRoutes(this.app)
-        console.log(`✓ Routes for module '${name}' registered`)
+        module.registerRoutes(this.app);
+        console.log(`✓ Routes for module '${name}' registered`);
       } catch (error) {
-        console.error(`✗ Failed to register routes for module '${name}':`, error)
-        throw error
+        console.error(`✗ Failed to register routes for module '${name}':`, error);
+        throw error;
       }
     }
 
     // Setup global middleware
-    this.setupGlobalMiddleware()
+    this.setupGlobalMiddleware();
 
     // Setup error handling
-    this.setupErrorHandling()
+    this.setupErrorHandling();
 
-    this.isInitialized = true
-    console.log('✓ Arvox Framework initialization complete')
+    this.isInitialized = true;
+    console.log('✓ Arvox Framework initialization complete');
   }
 
   /**
@@ -174,38 +174,38 @@ export class ArvoxFramework {
       this.app.use('*', async (c, next) => {
         const origin = Array.isArray(this.config.cors?.origin) 
           ? this.config.cors.origin.join(',') 
-          : this.config.cors?.origin || '*'
+          : this.config.cors?.origin || '*';
         
-        c.header('Access-Control-Allow-Origin', origin)
-        c.header('Access-Control-Allow-Methods', this.config.cors?.methods?.join(',') || 'GET,POST,PUT,DELETE,OPTIONS')
-        c.header('Access-Control-Allow-Headers', this.config.cors?.headers?.join(',') || 'Content-Type,Authorization')
+        c.header('Access-Control-Allow-Origin', origin);
+        c.header('Access-Control-Allow-Methods', this.config.cors?.methods?.join(',') || 'GET,POST,PUT,DELETE,OPTIONS');
+        c.header('Access-Control-Allow-Headers', this.config.cors?.headers?.join(',') || 'Content-Type,Authorization');
         
         if (c.req.method === 'OPTIONS') {
-          return c.text('', 200)
+          return c.text('', 200);
         }
         
-        await next()
-      })
+        await next();
+      });
     }
 
     // Request logging middleware
     if (this.config.logging?.requests) {
       this.app.use('*', async (c, next) => {
-        const start = Date.now()
-        await next()
-        const duration = Date.now() - start
-        console.log(`${c.req.method} ${c.req.url} - ${c.res.status} (${duration}ms)`)
-      })
+        const start = Date.now();
+        await next();
+        const duration = Date.now() - start;
+        console.log(`${c.req.method} ${c.req.url} - ${c.res.status} (${duration}ms)`);
+      });
     }
 
     // Security headers
     if (this.config.security?.headers) {
       this.app.use('*', async (c, next) => {
-        c.header('X-Content-Type-Options', 'nosniff')
-        c.header('X-Frame-Options', 'DENY')
-        c.header('X-XSS-Protection', '1; mode=block')
-        await next()
-      })
+        c.header('X-Content-Type-Options', 'nosniff');
+        c.header('X-Frame-Options', 'DENY');
+        c.header('X-XSS-Protection', '1; mode=block');
+        await next();
+      });
     }
   }
 
@@ -214,7 +214,7 @@ export class ArvoxFramework {
    */
   private setupErrorHandling(): void {
     this.app.onError((error, c) => {
-      console.error('Unhandled error:', error)
+      console.error('Unhandled error:', error);
       
       // Log error details if logging is enabled
       if (this.config.logging?.errors) {
@@ -224,25 +224,25 @@ export class ArvoxFramework {
           url: c.req.url,
           method: c.req.method,
           timestamp: new Date().toISOString()
-        })
+        });
       }
 
       // Return appropriate error response
-      const isDevelopment = this.config.environment === 'development'
+      const isDevelopment = this.config.environment === 'development';
       
       return c.json({
         success: false,
         error: isDevelopment ? error.message : 'Internal server error',
         ...(isDevelopment && { stack: error.stack })
-      }, 500)
-    })
+      }, 500);
+    });
 
     this.app.notFound((c) => {
       return c.json({
         success: false,
         error: 'Route not found'
-      }, 404)
-    })
+      }, 404);
+    });
   }
 
   /**
@@ -251,54 +251,54 @@ export class ArvoxFramework {
    */
   async start(): Promise<void> {
     if (!this.isInitialized) {
-      await this.initialize()
+      await this.initialize();
     }
 
-    const port = this.config.port || 3000
+    const port = this.config.port || 3000;
     
     return new Promise((resolve) => {
       serve({
         fetch: this.app.fetch,
         port
-      })
+      });
       
-      console.log(`🚀 Arvox Framework server started on port ${port}`)
-      console.log(`📚 API Documentation available at http://localhost:${port}/docs`)
-      console.log(`📋 OpenAPI spec available at http://localhost:${port}/openapi.json`)
+      console.log(`🚀 Arvox Framework server started on port ${port}`);
+      console.log(`📚 API Documentation available at http://localhost:${port}/docs`);
+      console.log(`📋 OpenAPI spec available at http://localhost:${port}/openapi.json`);
       
-      resolve()
-    })
+      resolve();
+    });
   }
 
   /**
    * Gracefully shutdown the framework
    */
   async shutdown(): Promise<void> {
-    console.log('Shutting down Arvox Framework...')
+    console.log('Shutting down Arvox Framework...');
 
     // Cleanup modules
     for (const [name, module] of this.modules) {
       try {
         if (typeof module.cleanup === 'function') {
-          await module.cleanup()
-          console.log(`✓ Module '${name}' cleaned up`)
+          await module.cleanup();
+          console.log(`✓ Module '${name}' cleaned up`);
         }
       } catch (error) {
-        console.error(`✗ Failed to cleanup module '${name}':`, error)
+        console.error(`✗ Failed to cleanup module '${name}':`, error);
       }
     }
 
     // Cleanup services
     for (const [name, service] of this.services) {
       try {
-        await service.cleanup()
-        console.log(`✓ Service '${name}' cleaned up`)
+        await service.cleanup();
+        console.log(`✓ Service '${name}' cleaned up`);
       } catch (error) {
-        console.error(`✗ Failed to cleanup service '${name}':`, error)
+        console.error(`✗ Failed to cleanup service '${name}':`, error);
       }
     }
 
-    console.log('✓ Arvox Framework shutdown complete')
+    console.log('✓ Arvox Framework shutdown complete');
   }
 
   /**
@@ -310,18 +310,18 @@ export class ArvoxFramework {
     services: { [name: string]: { healthy: boolean; message?: string } }
     modules: { [name: string]: { healthy: boolean; message?: string } }
   }> {
-    const serviceHealth: { [name: string]: { healthy: boolean; message?: string } } = {}
-    const moduleHealth: { [name: string]: { healthy: boolean; message?: string } } = {}
+    const serviceHealth: { [name: string]: { healthy: boolean; message?: string } } = {};
+    const moduleHealth: { [name: string]: { healthy: boolean; message?: string } } = {};
 
     // Check services
     for (const [name, service] of this.services) {
       try {
-        serviceHealth[name] = await service.healthCheck()
+        serviceHealth[name] = await service.healthCheck();
       } catch (error) {
         serviceHealth[name] = { 
           healthy: false, 
           message: error instanceof Error ? error.message : 'Health check failed' 
-        }
+        };
       }
     }
 
@@ -329,31 +329,31 @@ export class ArvoxFramework {
     for (const [name, module] of this.modules) {
       try {
         if (typeof module.healthCheck === 'function') {
-          moduleHealth[name] = await module.healthCheck()
+          moduleHealth[name] = await module.healthCheck();
         } else {
-          moduleHealth[name] = { healthy: true, message: 'No health check implemented' }
+          moduleHealth[name] = { healthy: true, message: 'No health check implemented' };
         }
       } catch (error) {
         moduleHealth[name] = { 
           healthy: false, 
           message: error instanceof Error ? error.message : 'Health check failed' 
-        }
+        };
       }
     }
 
     // Determine overall health
     const allHealthy = Object.values(serviceHealth).every(h => h.healthy) && 
-                      Object.values(moduleHealth).every(h => h.healthy)
+                      Object.values(moduleHealth).every(h => h.healthy);
     const someUnhealthy = Object.values(serviceHealth).some(h => !h.healthy) || 
-                         Object.values(moduleHealth).some(h => !h.healthy)
+                         Object.values(moduleHealth).some(h => !h.healthy);
 
-    const overall = allHealthy ? 'healthy' : someUnhealthy ? 'degraded' : 'unhealthy'
+    const overall = allHealthy ? 'healthy' : someUnhealthy ? 'degraded' : 'unhealthy';
 
     return {
       overall,
       services: serviceHealth,
       modules: moduleHealth
-    }
+    };
   }
 
   /**
@@ -361,7 +361,7 @@ export class ArvoxFramework {
    * @returns Hono app instance
    */
   getApp(): OpenAPIHono {
-    return this.app
+    return this.app;
   }
 
   /**
@@ -369,22 +369,21 @@ export class ArvoxFramework {
    * @returns Framework configuration
    */
   getConfig(): FrameworkConfig {
-    return this.config
+    return this.config;
   }
-}
 
   /**
    * Configure OpenAPI documentation with advanced settings
    * @param customConfig - Custom OpenAPI configuration
    */
   configureOpenAPI(customConfig?: Partial<OpenAPIConfig>): void {
-    const config = { ...defaultOpenAPIConfig, ...customConfig }
+    const config = { ...defaultOpenAPIConfig, ...customConfig };
     
     // Merge with framework config if provided
     if (this.config.swagger) {
-      config.title = this.config.swagger.title || config.title
-      config.description = this.config.swagger.description || config.description  
-      config.version = this.config.swagger.version || config.version
+      config.title = this.config.swagger.title || config.title;
+      config.description = this.config.swagger.description || config.description;  
+      config.version = this.config.swagger.version || config.version;
     }
 
     // Update OpenAPI documentation
@@ -404,15 +403,8 @@ export class ArvoxFramework {
         }
       ],
       tags: config.tags,
-      security: config.security,
-      components: {
-        ...config.components,
-        schemas: {
-          ...commonSchemas,
-          ...config.components?.schemas || {}
-        }
-      }
-    })
+      security: config.security
+    });
 
     // Add enhanced Swagger UI
     this.app.get('/docs', swaggerUI({ 
@@ -423,10 +415,10 @@ export class ArvoxFramework {
       filter: true,
       showExtensions: true,
       showCommonExtensions: true
-    }))
+    }));
 
     // Add additional documentation endpoints
-    this.setupAdditionalDocs()
+    this.setupAdditionalDocs();
   }
 
   /**
@@ -480,9 +472,9 @@ export class ArvoxFramework {
         }
       }
     }, async (c) => {
-      const health = await this.getHealthStatus()
-      return c.json(health)
-    })
+      const health = await this.getHealthStatus();
+      return c.json(health);
+    });
 
     // Endpoint pour les informations de l'API
     this.app.openapi({
@@ -531,8 +523,8 @@ export class ArvoxFramework {
         timestamp: new Date().toISOString(),
         modules: Array.from(this.modules.keys()),
         services: Array.from(this.services.keys())
-      })
-    })
+      });
+    });
 
     // Documentation alternative en JSON pour les développeurs
     this.app.get('/docs/json', async (c) => {
@@ -574,6 +566,7 @@ export class ArvoxFramework {
             apiKey: 'X-API-Key: <your-api-key>'
           }
         }
-      })
-    })
+      });
+    });
   }
+}

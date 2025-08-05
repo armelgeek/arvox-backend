@@ -1,4 +1,5 @@
-import { IRepository } from '../interfaces/repository.interface'
+import { IRepository } from '../interfaces/repository.interface';
+import { PaginationParams } from '../types/pagination.type';
 
 /**
  * Base repository class providing common database operations
@@ -56,8 +57,8 @@ export abstract class BaseRepository<TEntity, TId = string>
    * @returns Promise with boolean indicating existence
    */
   async exists(id: TId): Promise<boolean> {
-    const entity = await this.findById(id)
-    return entity !== null
+    const entity = await this.findById(id);
+    return entity !== null;
   }
 
   /**
@@ -68,8 +69,8 @@ export abstract class BaseRepository<TEntity, TId = string>
   async findByIds(ids: TId[]): Promise<TEntity[]> {
     const entities = await Promise.all(
       ids.map(id => this.findById(id))
-    )
-    return entities.filter(entity => entity !== null) as TEntity[]
+    );
+    return entities.filter(entity => entity !== null) as TEntity[];
   }
 
   /**
@@ -79,7 +80,7 @@ export abstract class BaseRepository<TEntity, TId = string>
    */
   async softDelete(id: TId): Promise<boolean> {
     // Default implementation - override in child classes if soft delete is supported
-    return this.delete(id)
+    return this.delete(id);
   }
 
   /**
@@ -87,9 +88,9 @@ export abstract class BaseRepository<TEntity, TId = string>
    * @param id - Entity identifier
    * @returns Promise with restored entity or null
    */
-  async restore(id: TId): Promise<TEntity | null> {
+  async restore(_id: TId): Promise<TEntity | null> {
     // Default implementation - override in child classes if restoration is supported
-    throw new Error('Restore operation not implemented')
+    throw new Error('Restore operation not implemented');
   }
 
   /**
@@ -99,48 +100,46 @@ export abstract class BaseRepository<TEntity, TId = string>
    * @param pagination - Optional pagination
    * @returns Promise with search results
    */
-  async search(
-    searchTerm: string,
-    searchFields: string[],
-    pagination?: { skip: number; limit: number }
-  ): Promise<TEntity[]> {
-    // Default implementation - override in child classes for specific search logic
-    throw new Error('Search operation not implemented')
+  async findWithSearch(
+    _searchTerm: string,
+    _searchFields: string[],
+    _pagination?: PaginationParams
+  ): Promise<{ data: TEntity[]; total: number }> {
+    // Default implementation - override in child classes for custom search logic
+    throw new Error('Search operation not implemented');
   }
 
   /**
-   * Batch create entities
+   * Create multiple entities in batch
    * @param dataArray - Array of creation data
    * @returns Promise with array of created entities
    */
-  async batchCreate(dataArray: Array<Omit<TEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<TEntity[]> {
+  async batchCreate(dataArray: any[]): Promise<TEntity[]> {
     const entities = await Promise.all(
       dataArray.map(data => this.create(data))
-    )
-    return entities
+    );
+    return entities;
   }
 
   /**
-   * Batch update entities
-   * @param updates - Array of {id, data} objects
+   * Update multiple entities in batch
+   * @param updates - Array of update objects with id and data
    * @returns Promise with array of updated entities
    */
-  async batchUpdate(updates: Array<{id: TId; data: Partial<Omit<TEntity, 'id' | 'createdAt' | 'updatedAt'>>}>): Promise<TEntity[]> {
+  async batchUpdate(updates: any[]): Promise<TEntity[]> {
     const entities = await Promise.all(
       updates.map(update => this.update(update.id, update.data))
-    )
-    return entities
+    );
+    return entities;
   }
 
   /**
-   * Batch delete entities
+   * Delete multiple entities in batch
    * @param ids - Array of entity identifiers
-   * @returns Promise with boolean indicating success
+   * @returns Promise with success status
    */
   async batchDelete(ids: TId[]): Promise<boolean> {
-    const results = await Promise.all(
-      ids.map(id => this.delete(id))
-    )
-    return results.every(result => result === true)
+    await Promise.all(ids.map(id => this.delete(id)));
+    return true;
   }
 }

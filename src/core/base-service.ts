@@ -1,14 +1,14 @@
-import { IService } from '../interfaces/service.interface'
+import { IService } from '../interfaces/service.interface';
 
 /**
  * Base service class providing common business logic patterns
  * Services orchestrate between repositories and external systems
  */
 export abstract class BaseService implements IService {
-  protected readonly name: string
+  protected readonly name: string;
 
   constructor(name: string) {
-    this.name = name
+    this.name = name;
   }
 
   /**
@@ -16,7 +16,7 @@ export abstract class BaseService implements IService {
    * @returns Service name
    */
   getName(): string {
-    return this.name
+    return this.name;
   }
 
   /**
@@ -25,7 +25,7 @@ export abstract class BaseService implements IService {
    */
   async initialize(): Promise<void> {
     // Default implementation - override in child classes
-    console.log(`Service ${this.name} initialized`)
+    console.log(`Service ${this.name} initialized`);
   }
 
   /**
@@ -34,7 +34,7 @@ export abstract class BaseService implements IService {
    */
   async cleanup(): Promise<void> {
     // Default implementation - override in child classes
-    console.log(`Service ${this.name} cleaned up`)
+    console.log(`Service ${this.name} cleaned up`);
   }
 
   /**
@@ -43,7 +43,7 @@ export abstract class BaseService implements IService {
    * @returns Promise with health status
    */
   async healthCheck(): Promise<{ healthy: boolean; message?: string }> {
-    return { healthy: true, message: `${this.name} service is healthy` }
+    return { healthy: true, message: `${this.name} service is healthy` };
   }
 
   /**
@@ -55,9 +55,9 @@ export abstract class BaseService implements IService {
    */
   protected validate<T>(data: any, schema: any): T {
     try {
-      return schema.parse(data)
+      return schema.parse(data);
     } catch (error: any) {
-      throw new Error(`Validation failed: ${error.message}`)
+      throw new Error(`Validation failed: ${error.message}`);
     }
   }
 
@@ -68,11 +68,11 @@ export abstract class BaseService implements IService {
    * @returns Formatted error
    */
   protected handleError(error: any, context?: string): Error {
-    const errorMessage = error?.message || 'An unexpected error occurred'
-    const fullMessage = context ? `${context}: ${errorMessage}` : errorMessage
+    const errorMessage = error?.message || 'An unexpected error occurred';
+    const fullMessage = context ? `${context}: ${errorMessage}` : errorMessage;
     
-    console.error(`Service Error [${this.name}]:`, fullMessage, error)
-    return new Error(fullMessage)
+    console.error(`Service Error [${this.name}]:`, fullMessage, error);
+    return new Error(fullMessage);
   }
 
   /**
@@ -87,23 +87,23 @@ export abstract class BaseService implements IService {
     maxRetries: number = 3,
     delay: number = 1000
   ): Promise<T> {
-    let lastError: any
+    let lastError: any;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        return await operation()
+        return await operation();
       } catch (error) {
-        lastError = error
-        const errorMessage = error instanceof Error ? error.message : String(error)
-        console.warn(`Service ${this.name} - Attempt ${attempt}/${maxRetries} failed:`, errorMessage)
+        lastError = error;
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.warn(`Service ${this.name} - Attempt ${attempt}/${maxRetries} failed:`, errorMessage);
         
         if (attempt < maxRetries) {
-          await this.sleep(delay * attempt) // Exponential backoff
+          await this.sleep(delay * attempt); // Exponential backoff
         }
       }
     }
 
-    throw this.handleError(lastError, `Failed after ${maxRetries} attempts`)
+    throw this.handleError(lastError, `Failed after ${maxRetries} attempts`);
   }
 
   /**
@@ -118,11 +118,11 @@ export abstract class BaseService implements IService {
   ): Promise<T> {
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => {
-        reject(new Error(`Operation timed out after ${timeoutMs}ms`))
-      }, timeoutMs)
-    })
+        reject(new Error(`Operation timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+    });
 
-    return Promise.race([operation(), timeoutPromise])
+    return Promise.race([operation(), timeoutPromise]);
   }
 
   /**
@@ -131,7 +131,7 @@ export abstract class BaseService implements IService {
    * @returns Promise that resolves after delay
    */
   protected sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -141,19 +141,19 @@ export abstract class BaseService implements IService {
    * @param data - Additional data to log
    */
   protected log(level: 'info' | 'warn' | 'error', message: string, data?: any): void {
-    const timestamp = new Date().toISOString()
-    const logMessage = `[${timestamp}] [${this.name}] ${message}`
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] [${this.name}] ${message}`;
     
     switch (level) {
       case 'info':
-        console.log(logMessage, data || '')
-        break
+        console.log(logMessage, data || '');
+        break;
       case 'warn':
-        console.warn(logMessage, data || '')
-        break
+        console.warn(logMessage, data || '');
+        break;
       case 'error':
-        console.error(logMessage, data || '')
-        break
+        console.error(logMessage, data || '');
+        break;
     }
   }
 
@@ -165,13 +165,13 @@ export abstract class BaseService implements IService {
    * @returns Service error
    */
   protected createError(message: string, code?: string, cause?: any): Error {
-    const error = new Error(`[${this.name}] ${message}`)
+    const error = new Error(`[${this.name}] ${message}`);
     if (code) {
-      (error as any).code = code
+      (error as any).code = code;
     }
     if (cause) {
-      (error as any).cause = cause
+      (error as any).cause = cause;
     }
-    return error
+    return error;
   }
 }

@@ -1,5 +1,5 @@
-import { IUseCase } from '../interfaces/use-case.interface'
-import { ActivityType } from '../types'
+import { IUseCase } from '../interfaces/use-case.interface';
+import { ActivityType } from '../types';
 
 /**
  * Base class for all use cases following the command pattern
@@ -28,7 +28,7 @@ export abstract class BaseUseCase<TParams, TResponse> implements IUseCase<TParam
   protected async validate(params: TParams): Promise<void> {
     // Default validation - override in child classes
     if (params === null || params === undefined) {
-      throw new Error('Parameters cannot be null or undefined')
+      throw new Error('Parameters cannot be null or undefined');
     }
   }
 
@@ -39,16 +39,16 @@ export abstract class BaseUseCase<TParams, TResponse> implements IUseCase<TParam
    * @returns Formatted error response
    */
   protected handleError(error: any, context?: string): { success: false; error: string } {
-    const errorMessage = error?.message || 'An unexpected error occurred'
-    const fullMessage = context ? `${context}: ${errorMessage}` : errorMessage
+    const errorMessage = error?.message || 'An unexpected error occurred';
+    const fullMessage = context ? `${context}: ${errorMessage}` : errorMessage;
     
     // Log the error for debugging
-    console.error(`UseCase Error [${this.constructor.name}]:`, fullMessage, error)
+    console.error(`UseCase Error [${this.constructor.name}]:`, fullMessage, error);
     
     return {
       success: false,
       error: fullMessage
-    }
+    };
   }
 
   /**
@@ -60,7 +60,7 @@ export abstract class BaseUseCase<TParams, TResponse> implements IUseCase<TParam
     return {
       success: true,
       data
-    }
+    };
   }
 
   /**
@@ -70,10 +70,10 @@ export abstract class BaseUseCase<TParams, TResponse> implements IUseCase<TParam
    */
   async run(params: TParams): Promise<TResponse> {
     try {
-      await this.validate(params)
-      return await this.execute(params)
+      await this.validate(params);
+      return await this.execute(params);
     } catch (error) {
-      return this.handleError(error) as TResponse
+      return this.handleError(error) as TResponse;
     }
   }
 }

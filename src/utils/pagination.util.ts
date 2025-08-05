@@ -2,9 +2,9 @@
  * Utility class for handling pagination logic
  */
 export class PaginationUtil {
-  private readonly defaultPage: number = 1
-  private readonly defaultLimit: number = 10
-  private readonly maxLimit: number = 100
+  private readonly defaultPage: number = 1;
+  private readonly defaultLimit: number = 10;
+  private readonly maxLimit: number = 100;
 
   /**
    * Extract pagination parameters from Hono context
@@ -12,14 +12,14 @@ export class PaginationUtil {
    * @returns Pagination parameters with skip calculated
    */
   extractFromContext(c: any): { page: number; limit: number; skip: number } {
-    const page = Math.max(1, parseInt(c.req.query('page') || '1', 10))
+    const page = Math.max(1, parseInt(c.req.query('page') || '1', 10));
     const limit = Math.min(
       this.maxLimit,
       Math.max(1, parseInt(c.req.query('limit') || String(this.defaultLimit), 10))
-    )
-    const skip = (page - 1) * limit
+    );
+    const skip = (page - 1) * limit;
 
-    return { page, limit, skip }
+    return { page, limit, skip };
   }
 
   /**
@@ -30,11 +30,11 @@ export class PaginationUtil {
    * @returns Pagination metadata
    */
   calculateMetadata(total: number, page: number, limit: number) {
-    const totalPages = Math.ceil(total / limit)
-    const hasNext = page < totalPages
-    const hasPrev = page > 1
-    const startIndex = (page - 1) * limit + 1
-    const endIndex = Math.min(page * limit, total)
+    const totalPages = Math.ceil(total / limit);
+    const hasNext = page < totalPages;
+    const hasPrev = page > 1;
+    const startIndex = (page - 1) * limit + 1;
+    const endIndex = Math.min(page * limit, total);
 
     return {
       total,
@@ -46,7 +46,7 @@ export class PaginationUtil {
       startIndex,
       endIndex,
       showing: `${startIndex}-${endIndex} of ${total}`
-    }
+    };
   }
 
   /**
@@ -57,15 +57,15 @@ export class PaginationUtil {
    */
   validate(page: number, limit: number): void {
     if (page < 1) {
-      throw new Error('Page number must be greater than 0')
+      throw new Error('Page number must be greater than 0');
     }
 
     if (limit < 1) {
-      throw new Error('Limit must be greater than 0')
+      throw new Error('Limit must be greater than 0');
     }
 
     if (limit > this.maxLimit) {
-      throw new Error(`Limit cannot exceed ${this.maxLimit}`)
+      throw new Error(`Limit cannot exceed ${this.maxLimit}`);
     }
   }
 
@@ -84,12 +84,12 @@ export class PaginationUtil {
       prev: page > 1 ? `${baseUrl}?page=${page - 1}&limit=${limit}` : null,
       next: page < totalPages ? `${baseUrl}?page=${page + 1}&limit=${limit}` : null,
       self: `${baseUrl}?page=${page}&limit=${limit}`
-    }
+    };
 
     // Remove null values
     return Object.fromEntries(
       Object.entries(links).filter(([_, value]) => value !== null)
-    )
+    );
   }
 
   /**
@@ -100,8 +100,8 @@ export class PaginationUtil {
    * @returns Paginated subset of items
    */
   applyToArray<T>(items: T[], page: number, limit: number): T[] {
-    const skip = (page - 1) * limit
-    return items.slice(skip, skip + limit)
+    const skip = (page - 1) * limit;
+    return items.slice(skip, skip + limit);
   }
 
   /**
@@ -120,8 +120,8 @@ export class PaginationUtil {
     limit: number,
     baseUrl?: string
   ) {
-    const metadata = this.calculateMetadata(total, page, limit)
-    const links = baseUrl ? this.createLinks(baseUrl, page, metadata.totalPages, limit) : undefined
+    const metadata = this.calculateMetadata(total, page, limit);
+    const links = baseUrl ? this.createLinks(baseUrl, page, metadata.totalPages, limit) : undefined;
 
     return {
       items,
@@ -129,7 +129,7 @@ export class PaginationUtil {
         ...metadata,
         ...(links && { links })
       }
-    }
+    };
   }
 
   /**
@@ -140,7 +140,7 @@ export class PaginationUtil {
     return {
       page: this.defaultPage,
       limit: this.defaultLimit
-    }
+    };
   }
 
   /**
@@ -148,6 +148,6 @@ export class PaginationUtil {
    * @returns Maximum limit value
    */
   getMaxLimit(): number {
-    return this.maxLimit
+    return this.maxLimit;
   }
 }
