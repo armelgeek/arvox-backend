@@ -1,7 +1,5 @@
 # @arvox/backend-framework
 
-# @armelwanes/backend-framework
-
 Un framework backend TypeScript moderne basé sur Hono, conçu selon l'architecture hexagonale pour créer des APIs robustes et maintenables.
 
 ## ⚡ Installation rapide
