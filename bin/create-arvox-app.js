@@ -9,7 +9,7 @@ const program = new Command();
 
 program
   .name('create-arvox-app')
-  .description('CLI pour créer des projets avec @armelgeek/backend-framework')
+  .description('CLI pour créer des projets avec @armelwanes/backend-framework')
   .version('1.0.0');
 
 program
@@ -53,7 +53,7 @@ async function generateBasicTemplate(projectDir, projectName) {
   const packageJson = {
     name: projectName,
     version: '1.0.0',
-    description: 'API créée avec @armelgeek/backend-framework',
+        description: 'API créée avec @armelwanes/backend-framework',
     main: 'dist/index.js',
     scripts: {
       dev: 'tsx watch src/index.ts',
@@ -61,7 +61,7 @@ async function generateBasicTemplate(projectDir, projectName) {
       start: 'node dist/index.js'
     },
     dependencies: {
-      '@armelgeek/backend-framework': '^1.0.0',
+      '@armelwanes/backend-framework': '^1.0.0',
       '@hono/node-server': '^1.8.2'
     },
     devDependencies: {
@@ -106,7 +106,7 @@ async function generateBasicTemplate(projectDir, projectName) {
   
   // index.ts principal
   const indexTs = `import { serve } from '@hono/node-server';
-import { ArvoxFramework } from '@armelgeek/backend-framework';
+import { ArvoxFramework } from '@armelwanes/backend-framework';
 import { HealthController } from './controllers/health.controller';
 
 const app = new ArvoxFramework({
@@ -134,7 +134,7 @@ serve({
   await fs.mkdir(path.join(projectDir, 'src', 'controllers'), { recursive: true });
   
   // HealthController
-  const healthController = `import { BaseController } from '@armelgeek/backend-framework';
+  const healthController = `import { BaseController } from '@armelwanes/backend-framework';
 import { z } from 'zod';
 
 export class HealthController extends BaseController {
@@ -179,7 +179,7 @@ export class HealthController extends BaseController {
   // README.md
   const readme = `# ${projectName}
 
-API créée avec [@armelgeek/backend-framework](https://github.com/armelgeek/backend-framework).
+API créée avec [@armelwanes/backend-framework](https://github.com/armelgeek/arvox-backend).
 
 ## Démarrage rapide
 
