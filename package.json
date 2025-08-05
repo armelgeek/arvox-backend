@@ -61,6 +61,7 @@
   "homepage": "https://github.com/arvox/backend-framework#readme",
   "dependencies": {
     "@hono/node-server": "^1.8.2",
+    "@hono/swagger-ui": "^0.5.2",
     "@hono/zod-openapi": "^0.9.8",
     "commander": "^14.0.0",
     "hono": "^4.0.0",
