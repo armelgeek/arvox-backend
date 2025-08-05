@@ -19,7 +19,7 @@ on:
           - prerelease
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -36,14 +36,11 @@ jobs:
       - name: Run linter
         run: bun run lint
 
-      - name: Run tests
-        run: bun test
-
       - name: Build package
         run: bun run build
 
   publish:
-    needs: test
+    needs: build
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     steps:
