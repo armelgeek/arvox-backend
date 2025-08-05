@@ -119,15 +119,7 @@ const app = new ArvoxFramework({
 
 // Enregistrer le module Health
 app.registerModule(new HealthModule());
-
-// Démarrer le serveur
-const port = 3000;
-console.log('🚀 Serveur démarré sur http://localhost:' + port);
-
-serve({
-  fetch: app.getApp().fetch,
-  port
-});
+app.start();
 `;
   await fs.writeFile(path.join(projectDir, 'src', 'index.ts'), indexTs);
 

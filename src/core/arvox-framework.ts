@@ -1,6 +1,8 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { serve } from '@hono/node-server';
 import { swaggerUI } from '@hono/swagger-ui';
+// @ts-ignore: apiReference peut être importé dynamiquement si besoin
+// import { apiReference } from 'some-swagger-ui-lib';
 import { IModule } from '../interfaces/module.interface';
 import { IService } from '../interfaces/service.interface';
 import { FrameworkConfig } from '../types/config.type';
@@ -20,31 +22,60 @@ export class ArvoxFramework {
   constructor(config: FrameworkConfig) {
     this.config = config;
     this.app = new OpenAPIHono();
-    this.setupOpenAPI();
+  // this.setupOpenAPI();
+  this.initializeSwaggerUI();
   }
 
   /**
    * Configure OpenAPI documentation
    */
-  private setupOpenAPI(): void {
-    // Add OpenAPI documentation
-    this.app.doc('/openapi.json', {
-      openapi: '3.0.0',
-      info: {
-        title: this.config.appName || 'Arvox Backend API',
-        version: this.config.version || '1.0.0',
-        description: this.config.description || 'API built with Arvox Framework'
-      },
-      servers: [
-        {
-          url: this.config.serverUrl || `http://localhost:${this.config.port || 3000}`,
-          description: this.config.environment || 'Development server'
-        }
-      ]
+  /**
+   * Setup OpenAPI 3.1 doc and Swagger UI (ou apiReference) inspiré de l'exemple fourni
+   */
+  private initializeSwaggerUI(): void {
+    // OpenAPI 3.1 doc route
+    this.app.doc31('/swagger', () => {
+      const protocol = 'https:';
+      const hostname = process.env.NODE_ENV === 'production' ? 'dev-api.meko.ac' : 'localhost';
+      const port = process.env.NODE_ENV === 'production' ? '' : '3000';
+      return {
+        openapi: '3.1.0',
+        info: {
+          version: this.config.version || '1.0.0',
+          title: this.config.appName || 'Arvox Backend API',
+          description: this.config.description || 'API built with Arvox Framework'
+        },
+        servers: [
+          { url: `${protocol}//${hostname}${port ? `:${port}` : ''}`, description: 'Current environment' }
+        ]
+      };
     });
 
-    // Add Swagger UI
-    this.app.get('/docs', swaggerUI({ url: '/openapi.json' }));
+    // Swagger UI (classique) sur /docs
+    this.app.get('/docs', swaggerUI({ url: '/swagger' }));
+
+    // Si tu veux utiliser apiReference à la place, décommente et adapte :
+    /*
+    this.app.get(
+      '/docs',
+      apiReference({
+        pageTitle: 'Arvox API Documentation',
+        theme: 'deepSpace',
+        isEditable: false,
+        layout: 'modern',
+        darkMode: true,
+        metaData: {
+          applicationName: 'Arvox API',
+          author: 'Arvox',
+          creator: 'Arvox',
+          publisher: 'Arvox',
+          robots: 'index, follow',
+          description: 'Arvox API is ...'
+        },
+        url: process.env.NODE_ENV === 'production' ? 'https://dev-api.meko.ac/swagger' : 'http://localhost:3000/swagger'
+      })
+    );
+    */
   }
 
   /**
