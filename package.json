@@ -1,5 +1,5 @@
 {
-  "name": "@armelwanes/backend-framework",
+  "name": "@armelwanes/arvox-framework",
   "version": "1.0.0",
   "description": "Un framework backend moderne et modulaire basé sur Hono, TypeScript et l'architecture hexagonale",
   "type": "module",
