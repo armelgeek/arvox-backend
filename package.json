@@ -1,5 +1,5 @@
 {
-  "name": "@arvox/backend-framework",
+  "name": "@armelgeek/backend-framework",
   "version": "1.0.0",
   "description": "Un framework backend moderne et modulaire basé sur Hono, TypeScript et l'architecture hexagonale",
   "type": "module",
@@ -53,12 +53,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arvox/backend-framework.git"
+    "url": "git+https://github.com/armelgeek/arvox-backend.git"
   },
   "bugs": {
-    "url": "https://github.com/arvox/backend-framework/issues"
+    "url": "https://github.com/armelgeek/arvox-backend/issues"
   },
-  "homepage": "https://github.com/arvox/backend-framework#readme",
+  "homepage": "https://github.com/armelgeek/arvox-backend#readme",
   "dependencies": {
     "@hono/node-server": "^1.8.2",
     "@hono/swagger-ui": "^0.5.2",

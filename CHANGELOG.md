@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - **CLI Tool**: `create-arvox-app` pour scaffolder de nouveaux projets
 - **Project Templates**: Templates préconfigurés avec architecture hexagonale
 - **Examples**: Exemples complets montrant les différentes approches
+- **Package Rename**: Migration de `@arvox/backend-framework` vers `@armelgeek/backend-framework`
 
 ### 🚀 Improved
 - **Developer Experience**: Réduction drastique de la verbosité du code

@@ -1,6 +1,6 @@
 # @arvox/backend-framework
 
-# @arvox/backend-framework
+# @armelgeek/backend-framework
 
 Un framework backend TypeScript moderne basé sur Hono, conçu selon l'architecture hexagonale pour créer des APIs robustes et maintenables.
 
@@ -31,11 +31,11 @@ npm run dev
 ## 📦 Installation manuelle
 
 ```bash
-npm install @arvox/backend-framework
+npm install @armelgeek/backend-framework
 # ou
-bun add @arvox/backend-framework
+bun add @armelgeek/backend-framework
 # ou  
-pnpm add @arvox/backend-framework
+pnpm add @armelgeek/backend-framework
 ```
 
 ## 🚀 Simplification des routes
@@ -45,7 +45,7 @@ Le framework offre **3 approches** pour créer des routes avec **60-70% moins de
 ### ✨ Méthode 1 : BaseController simplifié (Recommandé)
 
 ```typescript
-import { BaseController } from '@arvox/backend-framework';
+import { BaseController } from '@armelgeek/backend-framework';
 
 export class UserController extends BaseController {
   constructor() {
@@ -92,7 +92,7 @@ export class UserController extends BaseController {
 ### ⚡ Méthode 2 : Utilitaires Route
 
 ```typescript
-import { Route } from '@arvox/backend-framework/utils';
+import { Route } from '@armelgeek/backend-framework/utils';
 
 // Configuration encore plus simple - style fonctionnel
 const userRoutes = [
