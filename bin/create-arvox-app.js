@@ -53,7 +53,7 @@ async function generateBasicTemplate(projectDir, projectName) {
   const packageJson = {
     name: projectName,
     version: '1.0.0',
-  description: 'API créée avec arvox-backend',
+    description: 'API créée avec arvox-backend',
     main: 'dist/index.js',
     scripts: {
       dev: 'tsx watch src/index.ts',
@@ -61,7 +61,7 @@ async function generateBasicTemplate(projectDir, projectName) {
       start: 'node dist/index.js'
     },
     dependencies: {
-  'arvox-backend': '^1.0.0',
+      'arvox-backend': '^1.0.0',
       '@hono/node-server': '^1.8.2'
     },
     devDependencies: {
@@ -70,12 +70,12 @@ async function generateBasicTemplate(projectDir, projectName) {
       'typescript': '^5.0.0'
     }
   };
-  
+
   await fs.writeFile(
     path.join(projectDir, 'package.json'),
     JSON.stringify(packageJson, null, 2)
   );
-  
+
   // tsconfig.json
   const tsConfig = {
     compilerOptions: {
@@ -95,19 +95,21 @@ async function generateBasicTemplate(projectDir, projectName) {
     include: ['src/**/*'],
     exclude: ['node_modules', 'dist']
   };
-  
+
   await fs.writeFile(
     path.join(projectDir, 'tsconfig.json'),
     JSON.stringify(tsConfig, null, 2)
   );
-  
-  // Créer le dossier src
+
+  // Créer le dossier src, controllers, modules
   await fs.mkdir(path.join(projectDir, 'src'), { recursive: true });
-  
+  await fs.mkdir(path.join(projectDir, 'src', 'controllers'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'modules'), { recursive: true });
+
   // index.ts principal
   const indexTs = `import { serve } from '@hono/node-server';
 import { ArvoxFramework } from 'arvox-backend';
-import { HealthController } from './controllers/health.controller';
+import { HealthModule } from './modules/health.module';
 
 const app = new ArvoxFramework({
   title: '${projectName} API',
@@ -115,67 +117,94 @@ const app = new ArvoxFramework({
   description: 'API créée avec arvox-backend'
 });
 
-// Enregistrer les contrôleurs
-app.registerController(new HealthController());
+// Enregistrer le module Health
+app.registerModule(new HealthModule());
 
 // Démarrer le serveur
 const port = 3000;
 console.log('🚀 Serveur démarré sur http://localhost:' + port);
 
 serve({
-  fetch: app.fetch,
+  fetch: app.getApp().fetch,
   port
 });
 `;
-  
   await fs.writeFile(path.join(projectDir, 'src', 'index.ts'), indexTs);
-  
-  // Créer le dossier controllers
-  await fs.mkdir(path.join(projectDir, 'src', 'controllers'), { recursive: true });
-  
+
   // HealthController
   const healthController = `import { BaseController } from 'arvox-backend';
 import { z } from 'zod';
 
 export class HealthController extends BaseController {
-  constructor() {
-    super();
-    this.setupRoutes();
-  }
-
-  private setupRoutes() {
-    this.createGetRoute('/health', {
-      summary: 'Vérification de l\\'état du serveur',
-      responses: {
-        200: {
-          description: 'Serveur en bonne santé',
-          content: {
-            'application/json': {
-              schema: z.object({
-                status: z.string(),
-                timestamp: z.string(),
-                uptime: z.number()
-              })
-            }
+  initRoutes() {
+    this.createListRoute(
+      '/health',
+      {
+        response: z.object({
+          status: z.string(),
+          timestamp: z.string(),
+          uptime: z.number()
+        }),
+        tag: 'Health',
+        summary: "Vérification de l'état du serveur",
+        description: 'Retourne le statut de santé du serveur'
+      },
+      async (c) => {
+        return c.json({
+          success: true,
+          data: {
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            uptime: process.uptime()
           }
-        }
+        });
       }
-    }, async (c) => {
-      return c.json({
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
-      });
-    });
+    );
   }
 }
 `;
-  
   await fs.writeFile(
     path.join(projectDir, 'src', 'controllers', 'health.controller.ts'),
     healthController
   );
-  
+
+  // HealthModule
+  const healthModule = `import { IModule } from 'arvox-backend';
+import { HealthController } from '../controllers/health.controller';
+
+export class HealthModule implements IModule {
+  private controller: HealthController;
+
+  constructor() {
+    this.controller = new HealthController();
+  }
+
+  getName() {
+    return 'health';
+  }
+
+  async initialize() {
+    // Initialisation éventuelle
+  }
+
+  registerRoutes(app) {
+    app.route('/health', this.controller.controller);
+  }
+
+  async cleanup() {
+    // Nettoyage éventuel
+  }
+
+  async healthCheck() {
+    return { healthy: true };
+  }
+}
+`;
+  await fs.writeFile(
+    path.join(projectDir, 'src', 'modules', 'health.module.ts'),
+    healthModule
+  );
+
   // README.md
   const readme = `# ${projectName}
 
@@ -200,7 +229,6 @@ L'API sera disponible sur http://localhost:3000
 - \`npm run build\` : Compiler le projet
 - \`npm run start\` : Démarrer en mode production
 `;
-  
   await fs.writeFile(path.join(projectDir, 'README.md'), readme);
 }
 
