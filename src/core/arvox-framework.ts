@@ -1,8 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { serve } from '@hono/node-server';
 import { swaggerUI } from '@hono/swagger-ui';
-// @ts-ignore: apiReference peut être importé dynamiquement si besoin
-// import { apiReference } from 'some-swagger-ui-lib';
+import { apiReference } from '@scalar/hono-api-reference'
 import { IModule } from '../interfaces/module.interface';
 import { IService } from '../interfaces/service.interface';
 import { FrameworkConfig } from '../types/config.type';
@@ -50,12 +49,6 @@ export class ArvoxFramework {
         ]
       };
     });
-
-    // Swagger UI (classique) sur /docs
-    this.app.get('/docs', swaggerUI({ url: '/swagger' }));
-
-    // Si tu veux utiliser apiReference à la place, décommente et adapte :
-    /*
     this.app.get(
       '/docs',
       apiReference({
@@ -75,7 +68,7 @@ export class ArvoxFramework {
         url: process.env.NODE_ENV === 'production' ? 'https://dev-api.meko.ac/swagger' : 'http://localhost:3000/swagger'
       })
     );
-    */
+    
   }
 
   /**

@@ -1,6 +1,6 @@
 {
   "name": "arvox-backend",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Un framework backend moderne et modulaire basé sur Hono, TypeScript et l'architecture hexagonale",
   "type": "module",
   "main": "./dist/index.js",
