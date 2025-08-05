@@ -1,0 +1,82 @@
+{
+  "name": "@arvox/backend-framework",
+  "version": "1.0.0",
+  "description": "Un framework backend moderne et modulaire basé sur Hono, TypeScript et l'architecture hexagonale",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "bin": {
+    "create-arvox-app": "./bin/create-arvox-app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write src",
+    "prepublishOnly": "bun run clean && bun run build",
+    "example:simple": "bun run build && bun examples/simple-api.ts"
+  },
+  "keywords": [
+    "framework",
+    "backend",
+    "typescript",
+    "hono",
+    "hexagonal-architecture",
+    "clean-architecture",
+    "modular",
+    "openapi",
+    "swagger"
+  ],
+  "author": "armelgeek",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/armelgeek/arvox-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/armelgeek/arvox-backend/issues"
+  },
+  "homepage": "https://github.com/armelgeek/arvox-backend#readme",
+  "dependencies": {
+    "@hono/node-server": "^1.8.2",
+    "@hono/zod-openapi": "^0.9.8",
+    "commander": "^14.0.0",
+    "hono": "^4.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
+  }
+}
