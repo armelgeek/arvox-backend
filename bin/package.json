@@ -1,0 +1,11 @@
+{
+  "name": "create-arvox-app",
+  "version": "1.0.0",
+  "description": "CLI pour générer une application backend Arvox",
+  "bin": {
+    "create-arvox-app": "./create-arvox-app.js"
+  },
+  "author": "Arvox",
+  "license": "MIT"
+}
+                 
