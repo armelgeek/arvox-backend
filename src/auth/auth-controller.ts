@@ -128,40 +128,13 @@ export class AuthModuleFactory {
         },
 
         registerRoutes(app: OpenAPIHono): void {
-          // Enregistrer directement le handler Better Auth sur l'app principale
-          app.all('/api/v1/auth/*', async (c) => {
-            const path = c.req.path;
-            const auth = await authService.getAuth();
-            const response = await auth.handler(c.req.raw);
-
-            // Gestion spéciale pour les connexions - mise à jour lastLoginAt
-            if (c.req.method === 'POST' && (path.includes('/auth/sign-in/email') || path.includes('/auth/sign-in/email-otp'))) {
-              try {
-                const body = await response.text();
-                const data = JSON.parse(body);
-
-                if (data?.user?.id) {
-                  // Appeler la méthode de mise à jour du service
-                  await authService.updateLastLogin(data.user.id);
-                }
-
-                return new Response(body, {
-                  status: response.status,
-                  statusText: response.statusText,
-                  headers: response.headers
-                });
-              } catch (error) {
-                console.error('Failed to process login response:', error);
-              }
-            }
-
-            return response;
-          });
+          // Enregistrer les routes Better Auth directement via le service
+          authService.initRoutes(app);
 
           // Enregistrer les routes personnalisées via le controller
           authController.initRoutes();
           app.route('/api/v1', authController.controller);
-          console.log('✓ Auth routes registered at /api/v1/auth/*');
+          console.log('✓ Auth custom routes registered at /api/v1/auth/*');
         },
 
         async cleanup(): Promise<void> {

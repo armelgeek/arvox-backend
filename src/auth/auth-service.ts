@@ -6,6 +6,8 @@ import { BaseService } from '../core/base-service';
 import type { AuthConfig } from '../types/auth.type';
 import type { DrizzleDB } from '../types/database.type';
 import type { Context, Next } from 'hono';
+import type { OpenAPIHono } from '@hono/zod-openapi';
+import { Hono } from 'hono';
 
 /**
  * Service d'authentification basé sur Better Auth
@@ -15,11 +17,15 @@ export class AuthService extends BaseService {
   private authInstance: ReturnType<typeof betterAuth> | null = null;
   private config: AuthConfig;
   private db: DrizzleDB;
+  private router: Hono;
 
   constructor(config: AuthConfig, db: DrizzleDB) {
     super('AuthService');
     this.config = config;
     this.db = db;
+    this.router = new Hono({
+      strict: false,
+    });
   }
 
   async initialize(): Promise<void> {
@@ -82,6 +88,7 @@ export class AuthService extends BaseService {
       },
     });
 
+    
     console.log('✓ Better Auth service initialized');
   }
 
@@ -199,7 +206,40 @@ export class AuthService extends BaseService {
     this.authInstance = null;
     console.log('✓ Auth service cleaned up');
   }
+  async initRoutes(app: OpenAPIHono): Promise<void> {
+    const auth = await this.getAuth();
+    
+    // Enregistrer les routes d'authentification
+    app.all('/api/v1/auth/*', async (c: Context) => {
+      const path = c.req.path;
+      const response = await auth.handler(c.req.raw);
 
+      // Gestion spéciale pour les connexions - mise à jour lastLoginAt
+      if (c.req.method === 'POST' && (path.includes('/auth/sign-in/email') || path.includes('/auth/sign-in/email-otp'))) {
+        try {
+          const body = await response.text();
+          const data = JSON.parse(body);
+
+          if (data?.user?.id) {
+            // Appeler la méthode de mise à jour du service
+            await this.updateLastLogin(data.user.id);
+          }
+
+          return new Response(body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers
+          });
+        } catch (error) {
+          console.error('Failed to process login response:', error);
+        }
+      }
+
+      return response;
+    });
+
+    console.log('✓ Auth routes registered at /api/v1/auth/*');
+  }
   async healthCheck() {
     try {
       if (!this.authInstance) {
