@@ -21,7 +21,7 @@ export class AuthController extends BaseController {
     // GET /auth/session
     // etc.
     this.controller.all('/auth/*', async (c) => {
-      const handler = this.authService.getHandler();
+      const handler = await this.authService.getHandler();
       return handler(c.req.raw);
     });
 
@@ -30,7 +30,7 @@ export class AuthController extends BaseController {
     // GET /auth/me - Récupérer les infos de l'utilisateur connecté
     this.controller.get('/auth/me', async (c) => {
       try {
-        const auth = this.authService.getAuth();
+        const auth = await this.authService.getAuth();
         const session = await auth.api.getSession({
           headers: c.req.raw.headers,
         });
@@ -57,7 +57,7 @@ export class AuthController extends BaseController {
     // POST /auth/verify-session - Vérifier si une session est valide
     this.controller.post('/auth/verify-session', async (c) => {
       try {
-        const auth = this.authService.getAuth();
+        const auth = await this.authService.getAuth();
         const session = await auth.api.getSession({
           headers: c.req.raw.headers,
         });
@@ -144,8 +144,10 @@ export class AuthModuleFactory {
         },
       },
 
-      // Utilitaires d'authentification
-      utils: authService.getUtils(),
+      // Utilitaires d'authentification (fonction async)
+      async getUtils() {
+        return await authService.getUtils();
+      },
 
       // Middlewares
       middleware: {
