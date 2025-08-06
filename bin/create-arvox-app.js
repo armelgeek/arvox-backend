@@ -166,12 +166,51 @@ src/
 L'API sera disponible sur http://localhost:3000
 
 ## Scripts
--     npm run dev : Démarrer en mode développement
--     npm run build : Compiler le projet
--     npm run start : Démarrer en mode production
 `;
   await fs.writeFile(path.join(projectDir, 'README.md'), readme);
 }
+    // Exemple starter d'intégration Auth/API
+    const starterExample = `import { ArvoxFramework } from 'arvox-backend';
+
+  async function main() {
+    const framework = new ArvoxFramework({
+      appName: '${projectName}',
+      version: '1.0.0',
+      port: 3000,
+      cors: {
+        origin: '*',
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        headers: ['Content-Type', 'Authorization'],
+      },
+      logging: {
+        requests: true,
+        errors: true,
+      },
+    });
+
+    const app = framework.getApp();
+
+    app.get('/api', (c) => {
+      return c.json({ message: 'Hello Arvox Api' });
+    });
+s
+    // Route publique
+    app.get('/api/public', (c) => {
+      return c.json({ message: 'Public endpoint' });
+    });
+    // Route protégée (exemple, à adapter avec auth)
+    app.get('/api/protected', (c) => {
+      // TODO: Ajouter middleware d'authentification
+      return c.json({ message: 'Protected endpoint', user: null });
+    });
+
+    await framework.start();
+    console.log('✅ API starter lancée sur http://localhost:3000');
+  }
+
+  main().catch(console.error);
+  `;
+    await fs.writeFile(path.join(projectDir,'src', 'index.ts'), starterExample);
 
 function installDependencies(projectDir, packageManager) {
   return new Promise((resolve, reject) => {

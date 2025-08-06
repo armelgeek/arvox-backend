@@ -1,6 +1,6 @@
 {
   "name": "create-arvox-app",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "CLI pour générer une application backend Arvox",
   "type": "module",
   "bin": {
