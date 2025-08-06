@@ -55,11 +55,12 @@ npx arvox-auth config --social github,google --output ./src/db
 npx arvox-auth validate
 ```
 
-### Fichiers générés
+
+### Fichiers générés automatiquement
 
 ```
 db/
-├── schema.ts              # Schéma Drizzle (users, sessions, accounts, verifications)
+├── schema.ts              # Schéma Drizzle harmonisé (users, sessions, accounts, verifications)
 ├── index.ts               # Client de base de données
 ├── auth.config.ts         # Configuration Better Auth
 ├── integration-example.ts # Exemple d'intégration
@@ -67,19 +68,32 @@ db/
 │   └── init.sh           # Script d'initialisation
 └── drizzle.config.ts      # Config Drizzle Kit (racine)
 
-.env.example               # Variables d'environnement
+.env.example               # Variables d'environnement (format prêt à l'emploi)
+prettier.config.js         # Configuration Prettier
+eslint.config.js           # Configuration ESLint
+package.json               # Scripts & hooks git auto-ajoutés
 ```
+
+> **Astuce** : Les fichiers de configuration et scripts sont adaptés au gestionnaire de paquets choisi (`npm`, `pnpm`, `bun`).
+
+> **Note technique** : Le schéma Drizzle est harmonisé pour PostgreSQL, MySQL et SQLite (noms de tables et champs identiques).
+
+> **.env.example** : Généré avec toutes les variables nécessaires, y compris les clés pour providers sociaux. Format compatible linter, prêt à copier dans `.env`.
+
+> **Linter/ESLint** : Si vous voyez une erreur sur la ligne du shebang (`#!/usr/bin/env node`), c'est un faux positif. Node.js exécutera le CLI correctement. Configurez ESLint pour ignorer cette ligne dans les fichiers d'entrée CLI si besoin.
+
 
 
 
 ### Schéma généré
 
-Le CLI génère 4 tables optimisées pour Better Auth :
+Le CLI génère 4 tables optimisées et harmonisées pour Better Auth :
 
 - **`users`** : Utilisateurs avec champs étendus (firstname, lastname, role, isAdmin, etc.)
 - **`sessions`** : Sessions avec support d'impersonation
 - **`accounts`** : Comptes pour providers sociaux (OAuth)
 - **`verifications`** : Tokens de vérification email/reset password
+
 
 ### Intégration dans Arvox
 
@@ -130,13 +144,15 @@ GET  /api/v1/auth/sign-in/github    # GitHub OAuth
 GET  /api/v1/auth/sign-in/google    # Google OAuth
 ```
 
+
 ### Providers sociaux supportés
 
 - `github` - GitHub OAuth
-- `google` - Google OAuth  
+- `google` - Google OAuth
 - `discord` - Discord OAuth
 - `twitter` - Twitter/X OAuth
 - `facebook` - Facebook OAuth
+
 
 ### Support des bases de données
 
@@ -146,31 +162,33 @@ GET  /api/v1/auth/sign-in/google    # Google OAuth
 
 ---
 
-## 🚀 Workflow recommandé
 
+## 🚀 Workflow recommandé
 
 ### Exemple de workflow
 
 ```bash
-# 1. Générer l'authentification
+
+# 1. Générer l'authentification et tous les fichiers nécessaires
 npx arvox-auth generate --social github,google
 
 # 2. Installer les dépendances auth
 npm install better-auth drizzle-orm postgres
 
-# 3. Configurer les variables
+# 3. Configurer les variables d'environnement
 cp .env.example .env
-# Éditer .env avec vos vraies valeurs
+# Éditez .env avec vos vraies valeurs (clés OAuth, secrets, etc.)
 
 # 4. Migrations et démarrage
 npx drizzle-kit generate
 npx drizzle-kit push
 npm run dev
 
-# 5. Tester
+# 5. Tester l'API et la documentation
 curl http://localhost:3000/api/v1/auth/me
 curl http://localhost:3000/docs
 ```
+
 
 ### 📋 Astuce : Publication npm
 Avant de publier, vérifiez que le dossier `dist/` est bien présent et inclus dans le package. Utilisez le champ `files` dans `package.json` :
@@ -179,9 +197,11 @@ Avant de publier, vérifiez que le dossier `dist/` est bien présent et inclus d
 "files": ["dist", "arvox-auth.js"]
 ```
 
+
 ## 📚 Documentation complète
 - **CLI arvox-auth** : [docs/arvox-auth-cli.md](../docs/arvox-auth-cli.md)
 - **Framework général** : [README.md](../README.md)
+
 
 ## Auteur
 Arvox

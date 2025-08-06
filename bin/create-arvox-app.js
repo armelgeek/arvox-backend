@@ -58,16 +58,29 @@ async function generateBasicTemplate(projectDir, projectName) {
     scripts: {
       dev: 'tsx watch src/index.ts',
       build: 'tsc',
-      start: 'node dist/index.js'
-    },
+      start: 'node dist/index.js',
+      },
     dependencies: {
-      'arvox-backend': '^1.0.0',
-      '@hono/node-server': '^1.8.2'
+      'arvox-backend': '^1.0.5',
+      '@hono/node-server': '^1.8.2',
+      'drizzle-orm': '^0.43.1',
+      'dotenv': '^16.5.0',
+      'hono': '^4.7.5',
+      'postgres': '^3.4.5',
     },
     devDependencies: {
+      '@commitlint/cli': '^19.8.0',
+      '@commitlint/config-conventional': '^19.8.0',
+      '@kolhe/eslint-config': '2.2.6',
       '@types/node': '^20.0.0',
       'tsx': '^4.0.0',
-      'typescript': '^5.0.0'
+      'typescript': '^5.0.0',
+      'drizzle-kit': '^0.31.1',
+      'tsc-alias': '^1.8.13',
+      'prettier': '^3.5.3',
+      'eslint': '^9.23.0',
+      'simple-git-hooks': '^2.12.1',
+      'eslint-plugin-prettier': '^5.2.5',
     }
   };
 
