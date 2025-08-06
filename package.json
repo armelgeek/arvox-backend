@@ -1,6 +1,6 @@
 {
   "name": "arvox-backend",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Un framework backend moderne et modulaire basé sur Hono, TypeScript et l'architecture hexagonale avec authentification Better Auth + Drizzle intégrée",
   "type": "module",
   "main": "./dist/index.js",

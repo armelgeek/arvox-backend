@@ -19,7 +19,7 @@ npx arvox-auth generate [options]
 
 #### Options principales
 - `--provider <type>` : Base de données (`postgresql`, `mysql`, `sqlite`) - Défaut: `postgresql`
-- `--output <path>` : Dossier de sortie - Défaut: `./db`
+- `--output <path>` : Dossier de sortie - Défaut: `./src/db`
 - `--auth-url <url>` : URL de base - Défaut: `http://localhost:3000`
 - `--social <providers>` : Providers sociaux (ex: `github,google,discord`)
 
@@ -42,12 +42,12 @@ npx arvox-auth generate --output ./custom-db
 
 #### Schéma seulement
 ```bash
-npx arvox-auth schema --provider postgresql --output ./db
+npx arvox-auth schema --provider postgresql --output ./src/db
 ```
 
 #### Configuration seulement
 ```bash
-npx arvox-auth config --social github,google --output ./db
+npx arvox-auth config --social github,google --output ./src/db
 ```
 
 #### Validation
@@ -85,8 +85,8 @@ Le CLI génère 4 tables optimisées pour Better Auth :
 
 ```typescript
 import { ArvoxFramework, AuthModuleFactory } from 'arvox-backend';
-import { db } from './db';
-import { authConfig } from './db/auth.config';
+import { db } from './src/db';
+import { authConfig } from './src/db/auth.config';
 
 // Créer le module d'authentification
 const authModule = AuthModuleFactory.create({

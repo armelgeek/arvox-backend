@@ -29,7 +29,7 @@ program
   .command('generate')
   .description('Générer les fichiers d\'authentification')
   .option('--provider <type>', 'Type de base de données (postgresql, mysql, sqlite)', 'postgresql')
-  .option('--output <path>', 'Dossier de sortie', './db')
+  .option('--output <path>', 'Dossier de sortie', './src/db')
   .option('--auth-url <url>', 'URL de base pour l\'authentification', 'http://localhost:3000')
   .option('--social <providers>', 'Providers sociaux (github,google,discord)', '')
   .action(async (options) => {
@@ -78,7 +78,7 @@ program
   .command('schema')
   .description('Générer seulement le schéma Drizzle')
   .option('--provider <type>', 'Type de base de données', 'postgresql')
-  .option('--output <path>', 'Dossier de sortie', './db')
+  .option('--output <path>', 'Dossier de sortie', './src/db')
   .action(async (options) => {
     try {
       const config = {
@@ -107,7 +107,7 @@ program
   .command('config')
   .description('Générer seulement la configuration')
   .option('--social <providers>', 'Providers sociaux', '')
-  .option('--output <path>', 'Dossier de sortie', './db')
+  .option('--output <path>', 'Dossier de sortie', './src/db')
   .action(async (options) => {
     try {
       await generateAuthConfig(options.output, 'http://localhost:3000', options.social);
@@ -128,8 +128,8 @@ program
       
       // Vérifier les fichiers requis
       const requiredFiles = [
-        './db/schema.ts',
-        './db/index.ts',
+        './src/db/schema.ts',
+        './src/db/index.ts',
         './.env',
       ];
 

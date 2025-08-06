@@ -29,9 +29,9 @@ La documentation du framework Arvox a été entièrement mise à jour pour inclu
 - ✅ CLI `arvox-auth` ajouté aux binaires
 
 ### 4. `bin/arvox-auth.js` - Configuration CLI
-- ✅ Dossier de sortie par défaut corrigé : `./db` (au lieu de `./src/db`)
+- ✅ Dossier de sortie par défaut corrigé : `./src/db` (au lieu de `./src/db`)
 - ✅ Toutes les commandes configurées pour utiliser le bon dossier
-- ✅ Validation mise à jour pour chercher dans `./db/`
+- ✅ Validation mise à jour pour chercher dans `./src/db/`
 
 ## 🚀 Fonctionnalités documentées
 
@@ -81,7 +81,7 @@ framework.registerService(authModule.authService);
 
 ## 🔍 Tests effectués
 
-- ✅ Génération dans `./db/` fonctionne
+- ✅ Génération dans `./src/db/` fonctionne
 - ✅ Validation des fichiers fonctionne
 - ✅ Schéma généré conforme aux spécifications
 - ✅ Configuration Better Auth complète

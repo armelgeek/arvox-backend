@@ -175,35 +175,41 @@ export const verifications = pgTable('verifications', {
   }
 
   getMySQLTables() {
-    return `// User table
-export const user = table('user', {
+    return `// Users table
+export const users = table('users', {
   id: varchar('id', { length: 36 }).primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
+  firstname: varchar('firstname', { length: 255 }),
+  lastname: varchar('lastname', { length: 255 }),
   email: varchar('email', { length: 255 }).notNull().unique(),
-  emailVerified: timestamp('email_verified'),
+  lastLoginAt: timestamp('last_login_at'),
+  emailVerified: boolean('email_verified').notNull(),
   image: varchar('image', { length: 255 }),
+  role: varchar('role', { length: 50 }).notNull().default('user'),
+  isAdmin: boolean('is_admin').notNull().default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
 
-// Session table
-export const session = table('session', {
+// Sessions table
+export const sessions = table('sessions', {
   id: varchar('id', { length: 36 }).primaryKey(),
-  userId: varchar('user_id', { length: 36 }).notNull().references(() => user.id, { onDelete: 'cascade' }),
   expiresAt: timestamp('expires_at').notNull(),
   token: varchar('token', { length: 255 }).notNull().unique(),
-  ipAddress: varchar('ip_address', { length: 45 }),
-  userAgent: varchar('user_agent', { length: 500 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  ipAddress: varchar('ip_address', { length: 45 }),
+  userAgent: varchar('user_agent', { length: 500 }),
+  userId: varchar('user_id', { length: 36 }).notNull().references(() => users.id, { onDelete: 'cascade' }),
+  impersonatedBy: varchar('impersonated_by', { length: 36 }).references(() => users.id)
 });
 
-// Account table
-export const account = table('account', {
+// Accounts table
+export const accounts = table('accounts', {
   id: varchar('id', { length: 36 }).primaryKey(),
-  userId: varchar('user_id', { length: 36 }).notNull().references(() => user.id, { onDelete: 'cascade' }),
   accountId: varchar('account_id', { length: 255 }).notNull(),
   providerId: varchar('provider_id', { length: 255 }).notNull(),
+  userId: varchar('user_id', { length: 36 }).notNull().references(() => users.id, { onDelete: 'cascade' }),
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
   idToken: text('id_token'),
@@ -212,49 +218,56 @@ export const account = table('account', {
   scope: varchar('scope', { length: 255 }),
   password: varchar('password', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
 
-// Verification token table
-export const verificationToken = table('verification_token', {
+// Verifications table
+export const verifications = table('verifications', {
   id: varchar('id', { length: 36 }).primaryKey(),
   identifier: varchar('identifier', { length: 255 }).notNull(),
-  token: varchar('token', { length: 255 }).notNull().unique(),
+  value: varchar('value', { length: 255 }).notNull(),
   expiresAt: timestamp('expires_at').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
 });`;
   }
 
   getSQLiteTables() {
-    return `// User table
-export const user = table('user', {
+    return `// Users table
+export const users = table('users', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
+  firstname: text('firstname'),
+  lastname: text('lastname'),
   email: text('email').notNull().unique(),
-  emailVerified: integer('email_verified', { mode: 'timestamp' }),
+  lastLoginAt: integer('last_login_at', { mode: 'timestamp' }),
+  emailVerified: integer('email_verified'),
   image: text('image'),
+  role: text('role').notNull(),
+  isAdmin: integer('is_admin'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 });
 
-// Session table
-export const session = table('session', {
+// Sessions table
+export const sessions = table('sessions', {
   id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
   token: text('token').notNull().unique(),
-  ipAddress: text('ip_address'),
-  userAgent: text('user_agent'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  impersonatedBy: text('impersonated_by').references(() => users.id)
 });
 
-// Account table
-export const account = table('account', {
+// Accounts table
+export const accounts = table('accounts', {
   id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
   accountId: text('account_id').notNull(),
   providerId: text('provider_id').notNull(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
   idToken: text('id_token'),
@@ -263,16 +276,17 @@ export const account = table('account', {
   scope: text('scope'),
   password: text('password'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 });
 
-// Verification token table
-export const verificationToken = table('verification_token', {
+// Verifications table
+export const verifications = table('verifications', {
   id: text('id').primaryKey(),
   identifier: text('identifier').notNull(),
-  token: text('token').notNull().unique(),
+  value: text('value').notNull(),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
 });`;
   }
 

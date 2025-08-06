@@ -25,7 +25,7 @@ arvox-auth generate [options]
 
 **Options :**
 - `--provider <type>` : Type de base de données (`postgresql`, `mysql`, `sqlite`) - Défaut: `postgresql`
-- `--output <path>` : Dossier de sortie - Défaut: `./db`
+- `--output <path>` : Dossier de sortie - Défaut: `./src/db`
 - `--auth-url <url>` : URL de base pour l'authentification - Défaut: `http://localhost:3000`
 - `--social <providers>` : Providers sociaux séparés par des virgules - Défaut: aucun
 
@@ -54,7 +54,7 @@ arvox-auth schema [options]
 
 **Options :**
 - `--provider <type>` : Type de base de données - Défaut: `postgresql`
-- `--output <path>` : Dossier de sortie - Défaut: `./db`
+- `--output <path>` : Dossier de sortie - Défaut: `./src/db`
 
 **Exemple :**
 ```bash
@@ -71,7 +71,7 @@ arvox-auth config [options]
 
 **Options :**
 - `--social <providers>` : Providers sociaux - Défaut: aucun
-- `--output <path>` : Dossier de sortie - Défaut: `./db`
+- `--output <path>` : Dossier de sortie - Défaut: `./src/db`
 
 **Exemple :**
 ```bash
@@ -87,8 +87,8 @@ arvox-auth validate
 ```
 
 Vérifie la présence des fichiers requis :
-- `./db/schema.ts`
-- `./db/index.ts`
+- `./src/db/schema.ts`
+- `./src/db/index.ts`
 - `./.env`
 
 ### `init` - Interface interactive

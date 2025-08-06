@@ -46,7 +46,7 @@ npx arvox-auth config --social github,discord
 npx arvox-auth validate
 ```
 
-### 📁 Fichiers générés dans `./db/`
+### 📁 Fichiers générés dans `./src/db/`
 
 ```
 db/
@@ -90,8 +90,8 @@ export const sessions = pgTable('sessions', {
 
 ```typescript
 import { ArvoxFramework, AuthModuleFactory } from 'arvox-backend';
-import { db } from './db'; // Client généré
-import { authConfig } from './db/auth.config'; // Configuration générée
+import { db } from './src/db'; // Client généré
+import { authConfig } from './src/db/auth.config'; // Configuration générée
 
 // Créer le module d'authentification
 const authModule = AuthModuleFactory.create({
@@ -141,7 +141,7 @@ GET  /api/v1/auth/sign-in/google    # Connexion Google
 # Options disponibles
 npx arvox-auth generate \
   --provider postgresql \          # ou mysql, sqlite
-  --output ./custom-db \          # dossier de sortie (défaut: ./db)
+  --output ./custom-db \          # dossier de sortie (défaut: ./src/db)
   --auth-url http://localhost:3000 \  # URL de base
   --social github,google,discord      # providers sociaux
 
@@ -348,7 +348,7 @@ npx arvox-auth generate --social github,google
 # Options avancées
 npx arvox-auth generate \
   --provider postgresql \
-  --output ./db \
+  --output ./src/db \
   --auth-url http://localhost:3000 \
   --social github,google,discord
 
