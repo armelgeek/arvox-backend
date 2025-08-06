@@ -68,9 +68,6 @@ export class DrizzleAuthGenerator {
 ${tables}
 
 ${relations}
-
-// Export all tables
-export { users, sessions, accounts, verifications };
 `;
   }
 
