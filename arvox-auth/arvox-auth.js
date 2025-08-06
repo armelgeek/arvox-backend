@@ -1,4 +1,6 @@
+#!/usr/bin/env node
 /* global console, process */
+
 
 import { Command } from 'commander';
 import { DrizzleAuthGenerator } from './drizzle-generator.js';
@@ -76,7 +78,7 @@ program
         pkg.scripts = {
           ...pkg.scripts,
           build: 'tsc --noEmitOnError false && tsc-alias',
-          format: `${pm} run prettier --write \"./**/*.{js,ts,json}\"`,
+          format: `${pm} run prettier --write "./**/*.{js,ts,json}"`,
           lint: `${pm} run eslint .`,
           'lint:fix': `${pm} run lint --fix`,
           'db:generate': `${pm} run drizzle-kit generate`,
