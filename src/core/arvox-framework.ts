@@ -1,7 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { serve } from '@hono/node-server';
 import { swaggerUI } from '@hono/swagger-ui';
-import { apiReference } from '@scalar/hono-api-reference'
+import { apiReference } from '@scalar/hono-api-reference';
 import { IModule } from '../interfaces/module.interface';
 import { IService } from '../interfaces/service.interface';
 import { FrameworkConfig } from '../types/config.type';
@@ -540,7 +540,7 @@ export class ArvoxFramework {
       return c.json({
         name: this.config.appName || 'Arvox API',
         version: this.config.version || '1.0.0',
-  framework: 'arvox-backend',
+        framework: 'arvox-backend',
         frameworkVersion: '1.0.0',
         environment: this.config.environment || 'development',
         uptime: process.uptime(),
