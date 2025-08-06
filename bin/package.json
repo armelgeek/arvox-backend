@@ -1,11 +1,11 @@
 {
   "name": "create-arvox-app",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "CLI pour générer une application backend Arvox",
   "type": "module",
   "bin": {
     "create-arvox-app": "./create-arvox-app.js",
-    "arvox-auth": "./bin/arvox-auth.js"
+    "arvox-auth": "./arvox-auth.js"
   },
   "author": "Arvox",
   "license": "MIT",
