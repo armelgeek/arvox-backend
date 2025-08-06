@@ -3,10 +3,6 @@ import type { AuthConfig, DrizzleGeneratorConfig } from '../types/auth.type';
 import type { DrizzleDB } from '../types/database.type';
 import { BaseController } from '../core/base-controller';
 import type { OpenAPIHono } from '@hono/zod-openapi';
-import { Hono } from 'hono';
-const router = new Hono({
-  strict: false
-});
 
 /**
  * Controller d'authentification avec routes Better Auth intégrées
@@ -25,7 +21,7 @@ export class AuthController extends BaseController {
     // GET /auth/session
     // GET /auth/reference (documentation)
     // etc.
-    router.on(['POST', 'GET'], '/auth/*', async (c) => {
+    this.controller.all('/auth/*', async (c) => {
       const path = c.req.path;
       const auth = await this.authService.getAuth();
       const response = await auth.handler(c.req.raw);
@@ -168,6 +164,8 @@ export class AuthModuleFactory {
         },
 
         registerRoutes(app: OpenAPIHono): void {
+          // Initialiser les routes du controller
+          authController.initRoutes();
           // Enregistrer les routes d'authentification
           app.route('/api/v1', authController.controller);
           console.log('✓ Auth routes registered at /api/v1/auth/*');
