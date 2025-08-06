@@ -19,6 +19,7 @@ export class AuthController extends BaseController {
     // POST /auth/sign-up/email  
     // POST /auth/sign-out
     // GET /auth/session
+    // GET /auth/reference (documentation)
     // etc.
     this.controller.all('/auth/*', async (c) => {
       const handler = await this.authService.getHandler();

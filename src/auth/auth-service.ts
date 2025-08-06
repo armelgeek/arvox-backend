@@ -44,6 +44,10 @@ export class AuthService extends BaseService {
       baseURL: this.config.baseURL,
       trustedOrigins: this.config.trustedOrigins || ['http://localhost:3000'],
       
+      // Activer la documentation Better Auth
+      disableDefaultRoutes: false,
+      enableAPI: true,
+      
       // Configuration email/password
       emailAndPassword: {
         enabled: this.config.emailAndPassword?.enabled ?? true,
