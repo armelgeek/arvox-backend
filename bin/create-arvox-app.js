@@ -114,125 +114,61 @@ async function generateBasicTemplate(projectDir, projectName) {
     JSON.stringify(tsConfig, null, 2)
   );
 
-  // Créer le dossier src, controllers, modules
+  // Créer l'architecture DDD demandée
   await fs.mkdir(path.join(projectDir, 'src'), { recursive: true });
-  await fs.mkdir(path.join(projectDir, 'src', 'controllers'), { recursive: true });
-  await fs.mkdir(path.join(projectDir, 'src', 'modules'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'application', 'services'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'application', 'use-cases'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'domain', 'models'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'domain', 'repositories'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'domain', 'types'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'infrastructure', 'config'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'infrastructure', 'controllers'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'infrastructure', 'database'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'infrastructure', 'middlewares'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'infrastructure', 'repositories'), { recursive: true });
 
   // index.ts principal
-  const indexTs = `import { serve } from '@hono/node-server';
-import { ArvoxFramework } from 'arvox-backend';
-import { HealthModule } from './modules/health.module';
-
-const app = new ArvoxFramework({
-  title: '${projectName} API',
-  version: '1.0.0',
-  description: 'API créée avec arvox-backend'
-});
-
-// Enregistrer le module Health
-app.registerModule(new HealthModule());
-app.start();
+  const indexTs = `// Point d'entrée principal
+export * from './application';
+export * from './domain';
+export * from './infrastructure';
 `;
   await fs.writeFile(path.join(projectDir, 'src', 'index.ts'), indexTs);
-
-  // HealthController
-  const healthController = `import { BaseController } from 'arvox-backend';
-import { z } from 'zod';
-
-export class HealthController extends BaseController {
-  initRoutes() {
-    this.createListRoute(
-      '/health',
-      {
-        response: z.object({
-          status: z.string(),
-          timestamp: z.string(),
-          uptime: z.number()
-        }),
-        tag: 'Health',
-        summary: "Vérification de l'état du serveur",
-        description: 'Retourne le statut de santé du serveur'
-      },
-      async (c) => {
-        return c.json({
-          success: true,
-          data: {
-            status: 'healthy',
-            timestamp: new Date().toISOString(),
-            uptime: process.uptime()
-          }
-        });
-      }
-    );
-  }
-}
-`;
-  await fs.writeFile(
-    path.join(projectDir, 'src', 'controllers', 'health.controller.ts'),
-    healthController
-  );
-
-  // HealthModule
-  const healthModule = `import { IModule } from 'arvox-backend';
-import { HealthController } from '../controllers/health.controller';
-
-export class HealthModule implements IModule {
-  private controller: HealthController;
-
-  constructor() {
-    this.controller = new HealthController();
-  }
-
-  getName() {
-    return 'health';
-  }
-
-  async initialize() {
-    // Initialisation éventuelle
-  }
-
-  registerRoutes(app) {
-    app.route('/health', this.controller.controller);
-  }
-
-  async cleanup() {
-    // Nettoyage éventuel
-  }
-
-  async healthCheck() {
-    return { healthy: true };
-  }
-}
-`;
-  await fs.writeFile(
-    path.join(projectDir, 'src', 'modules', 'health.module.ts'),
-    healthModule
-  );
 
   // README.md
   const readme = `# ${projectName}
 
 API créée avec [arvox-backend](https://github.com/armelgeek/arvox-backend).
 
+## Structure DDD générée
+
+src/
+├── application/           # Couche application (use cases)
+│   ├── services/         # Services applicatifs
+│   └── use-cases/        # Cas d'utilisation
+├── domain/               # Couche domaine (logique métier)
+│   ├── models/          # Modèles et entités
+│   ├── repositories/    # Interfaces des repositories
+│   └── types/           # Types et interfaces partagés
+├── infrastructure/       # Couche infrastructure
+│   ├── config/          # Configuration (auth, mail, etc.)
+│   ├── controllers/     # Contrôleurs HTTP
+│   ├── database/        # Configuration base de données
+│   ├── middlewares/     # Middlewares HTTP
+│   ├── pages/           # Pages de documentation
+│   └── repositories/    # Implémentation des repositories
+└── index.ts             # Point d'entrée
+
 ## Démarrage rapide
 
-\`\`\`bash
-npm run dev
-\`\`\`
+    npm run dev
 
 L'API sera disponible sur http://localhost:3000
 
-## Documentation
-
-- Health check : GET /health
-- Documentation OpenAPI : GET /doc
-
 ## Scripts
-
-- \`npm run dev\` : Démarrer en mode développement
-- \`npm run build\` : Compiler le projet
-- \`npm run start\` : Démarrer en mode production
+-     npm run dev : Démarrer en mode développement
+-     npm run build : Compiler le projet
+-     npm run start : Démarrer en mode production
 `;
   await fs.writeFile(path.join(projectDir, 'README.md'), readme);
 }

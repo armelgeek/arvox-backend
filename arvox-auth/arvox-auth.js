@@ -29,7 +29,7 @@ program
   .command('generate')
   .description('Générer les fichiers d\'authentification')
   .option('--provider <type>', 'Type de base de données (postgresql, mysql, sqlite)', 'postgresql')
-  .option('--output <path>', 'Dossier de sortie', './src/db')
+  .option('--output <path>', 'Dossier de sortie', './src/infrastructure/database')
   .option('--auth-url <url>', 'URL de base pour l\'authentification', 'http://localhost:3000')
   .option('--social <providers>', 'Providers sociaux (github,google,discord)', '')
   .option('--package-manager <pm>', 'Gestionnaire de paquets (bun, npm, pnpm)', 'npm')
@@ -125,8 +125,8 @@ program
       
       // Vérifier les fichiers requis
       const requiredFiles = [
-        './src/db/schema.ts',
-        './src/db/index.ts',
+        './src/infrastructure/database/db/schema.ts',
+        './src/infrastructure/database/db/index.ts',
         './.env',
       ];
 
