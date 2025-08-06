@@ -1,57 +1,70 @@
 /**
  * Framework configuration interface
  */
+import type { AuthConfig } from './auth.type';
+
 export interface FrameworkConfig {
-  appName?: string
-  version?: string
-  description?: string
-  port?: number
-  environment?: 'development' | 'production' | 'test'
-  serverUrl?: string
+  appName?: string;
+  version?: string;
+  description?: string;
+  port?: number;
+  environment?: 'development' | 'staging' | 'production';
+  serverUrl?: string;
 
   // CORS configuration
   cors?: {
-    origin?: string | string[]
-    methods?: string[]
-    headers?: string[]
-    credentials?: boolean
-  }
+    origin?: string | string[];
+    methods?: string[];
+    headers?: string[];
+    credentials?: boolean;
+  };
 
   // Logging configuration
   logging?: {
-    requests?: boolean
-    errors?: boolean
-    level?: 'debug' | 'info' | 'warn' | 'error'
-  }
+    requests?: boolean;
+    errors?: boolean;
+    level?: 'error' | 'warn' | 'info' | 'debug';
+  };
 
   // Security configuration
   security?: {
-    headers?: boolean
-    rateLimiting?: boolean
-    helmet?: boolean
-  }
-
-  // Database configuration
-  database?: {
-    url?: string
-    host?: string
-    port?: number
-    name?: string
-    user?: string
-    password?: string
-  }
+    headers?: boolean;
+    rateLimit?: {
+      enabled: boolean;
+      windowMs: number;
+      max: number;
+    };
+  };
 
   // Swagger/OpenAPI configuration
   swagger?: {
-    enabled?: boolean
-    path?: string
-    title?: string
-    description?: string
-    version?: string
-  }
+    enabled?: boolean;
+    title?: string;
+    description?: string;
+    version?: string;
+    path?: string;
+  };
 
-  // Custom configuration
-  [key: string]: any
+  // API Reference configuration (pour @scalar/hono-api-reference)
+  apiReference?: {
+    pageTitle?: string;
+    theme?: 'deepSpace' | 'default' | 'purple' | 'bluePlanet' | 'saturn' | 'kepler' | 'mars' | 'moon';
+    isEditable?: boolean;
+    layout?: 'modern' | 'classic';
+    darkMode?: boolean;
+    url?: string;
+    metaData?: {
+      applicationName?: string;
+      author?: string;
+      creator?: string;
+      publisher?: string;
+      robots?: string;
+      description?: string;
+    };
+  };
+
+  // Authentication configuration
+  auth?: AuthConfig;
 }
 
 /**

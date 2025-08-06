@@ -1,11 +1,11 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { serve } from '@hono/node-server';
-import { swaggerUI } from '@hono/swagger-ui';
+// import { swaggerUI } from '@hono/swagger-ui';
 import { apiReference } from '@scalar/hono-api-reference';
 import { IModule } from '../interfaces/module.interface';
 import { IService } from '../interfaces/service.interface';
 import { FrameworkConfig } from '../types/config.type';
-import { defaultOpenAPIConfig, OpenAPIConfig } from './openapi-config';
+// import { defaultOpenAPIConfig, OpenAPIConfig } from './openapi-config';
 
 /**
  * Main framework class that orchestrates the entire application
@@ -49,25 +49,24 @@ export class ArvoxFramework {
         ]
       };
     });
-    this.app.get(
-      '/docs',
-      apiReference({
-        pageTitle: 'Arvox API Documentation',
-        theme: 'deepSpace',
-        isEditable: false,
-        layout: 'modern',
-        darkMode: true,
-        metaData: {
-          applicationName: 'Arvox API',
-          author: 'Arvox',
-          creator: 'Arvox',
-          publisher: 'Arvox',
-          robots: 'index, follow',
-          description: 'Arvox API is ...'
-        },
-        url: process.env.NODE_ENV === 'production' ? 'https://api.arvox.dev/swagger' : 'http://localhost:3000/swagger'
-      })
-    );
+    // Configuration dynamique pour apiReference
+    const apiRefConfig = {
+      pageTitle: this.config.apiReference?.pageTitle || 'Arvox API Documentation',
+      theme: this.config.apiReference?.theme || 'deepSpace',
+      isEditable: this.config.apiReference?.isEditable ?? false,
+      layout: this.config.apiReference?.layout || 'modern',
+      darkMode: this.config.apiReference?.darkMode ?? true,
+      metaData: {
+        applicationName: this.config.apiReference?.metaData?.applicationName || 'Arvox API',
+        author: this.config.apiReference?.metaData?.author || 'Arvox',
+        creator: this.config.apiReference?.metaData?.creator || 'Arvox',
+        publisher: this.config.apiReference?.metaData?.publisher || 'Arvox',
+        robots: this.config.apiReference?.metaData?.robots || 'index, follow',
+        description: this.config.apiReference?.metaData?.description || 'Arvox API is ...'
+      },
+      url: this.config.apiReference?.url || (process.env.NODE_ENV === 'production' ? 'https://api.arvox.dev/swagger' : 'http://localhost:3000/swagger')
+    };
+    this.app.get('/docs', apiReference(apiRefConfig));
     
   }
 
@@ -396,54 +395,6 @@ export class ArvoxFramework {
     return this.config;
   }
 
-  /**
-   * Configure OpenAPI documentation with advanced settings
-   * @param customConfig - Custom OpenAPI configuration
-   */
-  configureOpenAPI(customConfig?: Partial<OpenAPIConfig>): void {
-    const config = { ...defaultOpenAPIConfig, ...customConfig };
-    
-    // Merge with framework config if provided
-    if (this.config.swagger) {
-      config.title = this.config.swagger.title || config.title;
-      config.description = this.config.swagger.description || config.description;  
-      config.version = this.config.swagger.version || config.version;
-    }
-
-    // Update OpenAPI documentation
-    this.app.doc('/openapi.json', {
-      openapi: '3.0.0',
-      info: {
-        title: config.title || this.config.appName || 'Arvox Backend API',
-        version: config.version || this.config.version || '1.0.0',
-        description: config.description || 'API built with Arvox Framework',
-        contact: config.contact,
-        license: config.license
-      },
-      servers: config.servers || [
-        {
-          url: this.config.serverUrl || `http://localhost:${this.config.port || 3000}`,
-          description: this.config.environment || 'Development server'
-        }
-      ],
-      tags: config.tags,
-      security: config.security
-    });
-
-    // Add enhanced Swagger UI
-    this.app.get('/docs', swaggerUI({ 
-      url: '/openapi.json',
-      defaultModelsExpandDepth: 2,
-      defaultModelExpandDepth: 2,
-      docExpansion: 'list',
-      filter: true,
-      showExtensions: true,
-      showCommonExtensions: true
-    }));
-
-    // Add additional documentation endpoints
-    this.setupAdditionalDocs();
-  }
 
   /**
    * Setup additional documentation endpoints

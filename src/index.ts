@@ -10,6 +10,9 @@ export * from './types';
 // Utility exports
 export * from './utils';
 
+// Auth exports
+export * from './auth';
+
 // Main framework class
 export { ArvoxFramework } from './core/arvox-framework';
 

@@ -1,6 +1,6 @@
 # arvox-backend
 
-Un framework backend TypeScript moderne basé sur Hono, conçu selon l'architecture hexagonale pour créer des APIs robustes et maintenables.
+Un framework backend TypeScript moderne basé sur Hono, conçu selon l'architecture hexagonale pour créer des APIs robustes et maintenables avec **authentification Better Auth + Drizzle intégrée**.
 
 ## ⚡ Installation rapide
 
@@ -24,6 +24,132 @@ cd mon-projet
 # Modifier package.json pour pointer vers le framework local
 npm install
 npm run dev
+```
+
+## 🔐 Authentification Better Auth + Drizzle
+
+Le framework inclut maintenant un **générateur d'authentification intégré** utilisant Better Auth et Drizzle ORM :
+
+### 🚀 Génération rapide
+
+```bash
+# Générer l'authentification complète
+npx arvox-auth generate --social github,google
+
+# Générer seulement le schéma Drizzle
+npx arvox-auth schema --provider postgresql
+
+# Générer seulement la configuration
+npx arvox-auth config --social github,discord
+
+# Valider une configuration existante
+npx arvox-auth validate
+```
+
+### 📁 Fichiers générés dans `./db/`
+
+```
+db/
+├── schema.ts              # Schéma Drizzle (users, sessions, accounts, verifications)
+├── index.ts               # Client de base de données
+├── auth.config.ts         # Configuration Better Auth
+├── integration-example.ts # Exemple d'intégration dans votre app
+└── migrations/            # Dossier des migrations
+```
+
+### ✨ Schéma généré
+
+```typescript
+// db/schema.ts - Tables optimisées pour Better Auth
+export const users = pgTable('users', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  firstname: text('firstname'),
+  lastname: text('lastname'),
+  email: text('email').notNull().unique(),
+  lastLoginAt: timestamp('last_login_at'),
+  emailVerified: boolean('email_verified').notNull(),
+  image: text('image'),
+  role: text('role').notNull().default('user'),
+  isAdmin: boolean('is_admin').notNull().default(false),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at').notNull()
+});
+
+export const sessions = pgTable('sessions', {
+  id: text('id').primaryKey(),
+  expiresAt: timestamp('expires_at').notNull(),
+  token: text('token').notNull().unique(),
+  userId: text('user_id').notNull().references(() => users.id),
+  impersonatedBy: text('impersonated_by').references(() => users.id),
+  // ... autres champs
+});
+```
+
+### 🔧 Intégration dans votre application
+
+```typescript
+import { ArvoxFramework, AuthModuleFactory } from 'arvox-backend';
+import { db } from './db'; // Client généré
+import { authConfig } from './db/auth.config'; // Configuration générée
+
+// Créer le module d'authentification
+const authModule = AuthModuleFactory.create({
+  auth: authConfig,
+  db: db,
+});
+
+const framework = new ArvoxFramework({
+  appName: 'Mon API avec Auth',
+  version: '1.0.0',
+  port: 3000,
+});
+
+// Enregistrer l'authentification
+framework.registerModule(authModule.module);
+framework.registerService(authModule.authService);
+
+// Routes protégées
+const app = framework.getApp();
+app.get('/api/protected', authModule.middleware.required, (c) => {
+  const user = c.get('user');
+  return c.json({ message: 'Protected endpoint', user });
+});
+
+await framework.start();
+```
+
+### 🎯 Endpoints d'authentification automatiques
+
+Une fois intégré, votre API dispose automatiquement de :
+
+```
+POST /api/v1/auth/sign-up/email     # Inscription par email
+POST /api/v1/auth/sign-in/email     # Connexion par email
+GET  /api/v1/auth/me                # Profil utilisateur
+POST /api/v1/auth/sign-out          # Déconnexion
+GET  /api/v1/auth/session           # Vérifier la session
+
+# Avec providers sociaux configurés :
+GET  /api/v1/auth/sign-in/github    # Connexion GitHub
+GET  /api/v1/auth/sign-in/google    # Connexion Google
+```
+
+### ⚙️ Configuration CLI `arvox-auth`
+
+```bash
+# Options disponibles
+npx arvox-auth generate \
+  --provider postgresql \          # ou mysql, sqlite
+  --output ./custom-db \          # dossier de sortie (défaut: ./db)
+  --auth-url http://localhost:3000 \  # URL de base
+  --social github,google,discord      # providers sociaux
+
+# Commandes spécialisées
+npx arvox-auth init                 # Interface interactive (à venir)
+npx arvox-auth schema --provider mysql
+npx arvox-auth config --social github
+npx arvox-auth validate            # Vérifie la configuration
 ```
 
 ## 📦 Installation manuelle
@@ -189,9 +315,11 @@ Consultez le dossier `examples/` pour voir des implémentations complètes :
 - [`simple-api.ts`](examples/simple-api.ts) : API basique avec CRUD
 - [`advanced-documentation.ts`](examples/advanced-documentation.ts) : Documentation OpenAPI avancée
 
-## 🔧 CLI
+## 🔧 CLI Tools
 
-Le CLI `create-arvox-app` génère des projets préconfigurés :
+Le framework Arvox fournit **deux CLI** pour faciliter le développement :
+
+### 📦 `create-arvox-app` - Générateur de projets
 
 ```bash
 # Nouveau projet avec npm
@@ -204,12 +332,64 @@ npx create-arvox-app init mon-projet --package-manager bun
 npx create-arvox-app init mon-projet --package-manager pnpm
 ```
 
-Le projet généré inclut :
+**Génère :**
 - 📁 Structure de dossiers optimisée
 - 🏥 Contrôleur Health avec endpoint `/health`
 - 📖 Documentation automatique sur `/doc`
 - ⚙️ Configuration TypeScript/ESLint
 - 🔥 Hot reload avec `tsx`
+
+### 🔐 `arvox-auth` - Générateur d'authentification
+
+```bash
+# Génération complète (recommandé)
+npx arvox-auth generate --social github,google
+
+# Options avancées
+npx arvox-auth generate \
+  --provider postgresql \
+  --output ./db \
+  --auth-url http://localhost:3000 \
+  --social github,google,discord
+
+# Commandes spécialisées
+npx arvox-auth schema --provider mysql     # Schéma seulement
+npx arvox-auth config --social github      # Config seulement
+npx arvox-auth validate                    # Validation
+```
+
+**Génère :**
+- 🗄️ Schéma Drizzle optimisé (users, sessions, accounts, verifications)
+- ⚙️ Configuration Better Auth avec providers sociaux
+- 📝 Fichier .env.example avec toutes les variables
+- 🔗 Client de base de données typé
+- 📋 Exemple d'intégration complet
+- 🛠️ Scripts de migration Drizzle
+
+### 🎯 Workflow recommandé
+
+```bash
+# 1. Créer le projet
+npx create-arvox-app init mon-api-auth
+cd mon-api-auth
+
+# 2. Générer l'authentification  
+npx arvox-auth generate --social github,google
+
+# 3. Installer les dépendances auth
+npm install better-auth drizzle-orm postgres
+
+# 4. Configurer .env (copier depuis .env.example)
+cp .env.example .env
+# Éditer .env avec vos vraies valeurs
+
+# 5. Lancer en développement
+npm run dev
+
+# 6. Tester les endpoints
+curl http://localhost:3000/api/v1/auth/me
+curl http://localhost:3000/docs  # Documentation
+```
 
 ---
 

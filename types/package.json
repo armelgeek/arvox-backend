@@ -1,6 +1,6 @@
 {
   "name": "arvox-backend-types",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript definitions for arvox-backend framework.",
   "types": "index.d.ts",
   "repository": {
