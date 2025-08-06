@@ -1,0 +1,30 @@
+{
+  "name": "arvox-minio",
+  "version": "1.0.0",
+  "description": "MinIO client/service for Arvox backend framework.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src --ext .ts",
+    "test": "echo 'No tests yet'"
+  },
+  "keywords": [
+    "minio",
+    "arvox",
+    "storage",
+    "s3",
+    "backend"
+  ],
+  "author": "Arvox Team",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.830.0",
+    "@aws-sdk/lib-storage": "^3.830.0",
+    "@aws-sdk/s3-request-presigner": "^3.830.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}
