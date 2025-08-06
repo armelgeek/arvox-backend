@@ -13,44 +13,8 @@ export class AuthController extends BaseController {
   }
 
   initRoutes() {
-    // Route handler pour toutes les requêtes d'authentification Better Auth
-    // Gère automatiquement toutes les routes comme:
-    // POST /auth/sign-in/email
-    // POST /auth/sign-up/email  
-    // POST /auth/sign-out
-    // GET /auth/session
-    // GET /auth/reference (documentation)
-    // etc.
-    this.controller.all('/auth/*', async (c) => {
-      const path = c.req.path;
-      const auth = await this.authService.getAuth();
-      const response = await auth.handler(c.req.raw);
-
-      // Gestion spéciale pour les connexions - mise à jour lastLoginAt
-      if (c.req.method === 'POST' && (path.includes('/auth/sign-in/email') || path.includes('/auth/sign-in/email-otp'))) {
-        try {
-          const body = await response.text();
-          const data = JSON.parse(body);
-
-          if (data?.user?.id) {
-            // Appeler la méthode de mise à jour du service
-            await this.authService.updateLastLogin(data.user.id);
-          }
-
-          return new Response(body, {
-            status: response.status,
-            statusText: response.statusText,
-            headers: response.headers
-          });
-        } catch (error) {
-          console.error('Failed to process login response:', error);
-        }
-      }
-
-      return response;
-    });
-
     // Routes personnalisées pour l'intégration avec l'API
+    // Les routes Better Auth sont gérées directement dans registerRoutes()
     
     // GET /auth/me - Récupérer les infos de l'utilisateur connecté
     this.controller.get('/auth/me', async (c) => {
@@ -164,9 +128,38 @@ export class AuthModuleFactory {
         },
 
         registerRoutes(app: OpenAPIHono): void {
-          // Initialiser les routes du controller
+          // Enregistrer directement le handler Better Auth sur l'app principale
+          app.all('/api/v1/auth/*', async (c) => {
+            const path = c.req.path;
+            const auth = await authService.getAuth();
+            const response = await auth.handler(c.req.raw);
+
+            // Gestion spéciale pour les connexions - mise à jour lastLoginAt
+            if (c.req.method === 'POST' && (path.includes('/auth/sign-in/email') || path.includes('/auth/sign-in/email-otp'))) {
+              try {
+                const body = await response.text();
+                const data = JSON.parse(body);
+
+                if (data?.user?.id) {
+                  // Appeler la méthode de mise à jour du service
+                  await authService.updateLastLogin(data.user.id);
+                }
+
+                return new Response(body, {
+                  status: response.status,
+                  statusText: response.statusText,
+                  headers: response.headers
+                });
+              } catch (error) {
+                console.error('Failed to process login response:', error);
+              }
+            }
+
+            return response;
+          });
+
+          // Enregistrer les routes personnalisées via le controller
           authController.initRoutes();
-          // Enregistrer les routes d'authentification
           app.route('/api/v1', authController.controller);
           console.log('✓ Auth routes registered at /api/v1/auth/*');
         },
