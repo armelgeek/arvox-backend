@@ -1,6 +1,6 @@
 {
   "name": "arvox-backend",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Un framework backend moderne et modulaire basé sur Hono, TypeScript et l'architecture hexagonale avec authentification Better Auth + Drizzle intégrée",
   "type": "module",
   "main": "./dist/index.js",
@@ -28,10 +28,6 @@
     "README.md",
     "CHANGELOG.md"
   ],
-  "bin": {
-    "create-arvox-app": "./bin/create-arvox-app.js",
-    "arvox-auth": "./bin/arvox-auth.js"
-  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
