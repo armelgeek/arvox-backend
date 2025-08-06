@@ -134,7 +134,7 @@ import { ArvoxFramework } from 'arvox-backend';
 import { HealthModule } from './infrastructure/modules/health.module';
 
 const app = new ArvoxFramework({
-  title: '${projectName} API',
+  appName: '${projectName} API',
   version: '1.0.0',
   description: 'API créée avec arvox-backend'
 });
@@ -201,7 +201,7 @@ export class HealthModule implements IModule {
     // Initialisation éventuelle
   }
 
-  registerRoutes(app) {
+  registerRoutes(app:any) {
     app.route('/health', this.controller.controller);
   }
 
