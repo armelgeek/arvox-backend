@@ -1,6 +1,3 @@
-
-
-#!/usr/bin/env node
 /* global console, process */
 
 import { Command } from 'commander';
