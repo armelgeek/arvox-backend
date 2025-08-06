@@ -212,6 +212,7 @@ export class AuthService extends BaseService {
     // Enregistrer les routes d'authentification
     app.all('/api/v1/auth/*', async (c: Context) => {
       const path = c.req.path;
+      console.log(`Handling auth request for path: ${path}`);
       const response = await auth.handler(c.req.raw);
 
       // Gestion spéciale pour les connexions - mise à jour lastLoginAt

@@ -49,6 +49,7 @@ export class ArvoxFramework {
         ]
       };
     });
+    
     // Configuration dynamique pour apiReference
     const apiRefConfig = {
       pageTitle: this.config.apiReference?.pageTitle || 'Arvox API Documentation',
@@ -67,7 +68,9 @@ export class ArvoxFramework {
       url: this.config.apiReference?.url || (process.env.NODE_ENV === 'production' ? 'https://api.arvox.dev/swagger' : 'http://localhost:3000/swagger')
     };
     this.app.get('/docs', apiReference(apiRefConfig));
-    
+
+    // Enregistrer les routes Better Auth pour la documentation
+    this.setupBetterAuthRoutes();
   }
 
   /**
@@ -543,5 +546,119 @@ export class ArvoxFramework {
         }
       });
     });
+  }
+
+  /**
+   * Setup Better Auth routes for documentation
+   */
+  private setupBetterAuthRoutes(): void {
+    // Enregistrer les routes Better Auth pour la documentation avec délégation intelligente
+    this.app.all('/api/v1/auth/*', async (c) => {
+      // Rechercher le service d'authentification
+      const authService = this.getService('AuthService');
+      
+      if (!authService) {
+        // Si pas de service d'auth, retourner une erreur informative
+        return c.json({ 
+          error: 'Authentication service not available',
+          message: 'The authentication service has not been registered with the framework.',
+          availableServices: Array.from(this.services.keys()),
+          hint: 'Make sure to register an AuthService with framework.registerService()'
+        }, 503);
+      }
+
+      try {
+        // Essayer d'obtenir le handler Better Auth du service
+        // @ts-ignore - AuthService aura la méthode getHandler
+        const handler = await authService.getHandler();
+        
+        // Déléguer la requête au handler Better Auth
+        const response = await handler(c.req.raw);
+        
+        // Copier la réponse avec les en-têtes appropriés
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers
+        });
+        
+      } catch (error) {
+        console.error('Better Auth handler error:', error);
+        
+        return c.json({ 
+          error: 'Authentication handler error',
+          message: error instanceof Error ? error.message : 'Unknown authentication error',
+          path: c.req.path,
+          method: c.req.method
+        }, 500);
+      }
+    });
+    
+    // Ajouter un endpoint de référence pour la documentation Better Auth
+    this.app.get('/api/v1/auth/reference', async (c) => {
+      return c.json({
+        name: 'Better Auth API Reference',
+        description: 'Authentication and session management endpoints',
+        version: '1.0.0',
+        baseUrl: '/api/v1/auth',
+        documentation: {
+          interactive: 'Available in main API documentation at /docs',
+          openapi: 'OpenAPI specification at /swagger'
+        },
+        endpoints: {
+          authentication: {
+            'POST /sign-up/email': {
+              description: 'Create a new user account with email and password',
+              body: { email: 'string', password: 'string', name: 'string (optional)' }
+            },
+            'POST /sign-in/email': {
+              description: 'Sign in with email and password',
+              body: { email: 'string', password: 'string' }
+            },
+            'POST /sign-out': {
+              description: 'Sign out the current user session',
+              requiresAuth: true
+            }
+          },
+          session: {
+            'GET /session': {
+              description: 'Get current session information',
+              requiresAuth: true
+            },
+            'GET /me': {
+              description: 'Get current user profile (custom endpoint)',
+              requiresAuth: true
+            },
+            'POST /verify-session': {
+              description: 'Verify if the current session is valid'
+            }
+          },
+          password: {
+            'POST /forget-password': {
+              description: 'Request password reset',
+              body: { email: 'string' }
+            },
+            'POST /reset-password': {
+              description: 'Reset password with token',
+              body: { token: 'string', password: 'string' }
+            }
+          },
+          verification: {
+            'POST /verify-email': {
+              description: 'Verify email address',
+              body: { token: 'string' }
+            }
+          }
+        },
+        usage: {
+          authentication: 'Include session cookies or Authorization header',
+          cors: 'CORS is handled automatically',
+          errors: 'Standard HTTP status codes with JSON error messages'
+        }
+      });
+    });
+    
+    console.log('✓ Better Auth routes registered with intelligent delegation at /api/v1/auth/*');
+    console.log('✓ Better Auth reference documentation available at /api/v1/auth/reference');
   }
 }
