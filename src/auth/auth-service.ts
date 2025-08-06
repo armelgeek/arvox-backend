@@ -85,9 +85,9 @@ export class AuthService extends BaseService {
    * Récupère l'instance Better Auth
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getAuth(): any {
+  async getAuth(): Promise<any> {
     if (!this.authInstance) {
-      throw new Error('Auth service not initialized. Call initialize() first.');
+      await this.initialize();
     }
     return this.authInstance;
   }
@@ -96,17 +96,17 @@ export class AuthService extends BaseService {
    * Handler pour les requêtes d'authentification
    * À utiliser dans les routes /auth/*
    */
-  getHandler() {
-    return this.getAuth().handler;
+  async getHandler() {
+    const auth = await this.getAuth();
+    return auth.handler;
   }
 
   /**
    * Middleware d'authentification pour protéger les routes
    */
   createAuthMiddleware() {
-    const auth = this.getAuth();
-    
     return async (c: Context, next: Next) => {
+      const auth = await this.getAuth();
       const session = await auth.api.getSession({
         headers: c.req.raw.headers,
       });
@@ -128,10 +128,9 @@ export class AuthService extends BaseService {
    * N'interrompt pas la requête si non authentifié
    */
   createOptionalAuthMiddleware() {
-    const auth = this.getAuth();
-    
     return async (c: Context, next: Next) => {
       try {
+        const auth = await this.getAuth();
         const session = await auth.api.getSession({
           headers: c.req.raw.headers,
         });
@@ -153,8 +152,8 @@ export class AuthService extends BaseService {
    * Utilitaires d'authentification
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getUtils(): any {
-    const auth = this.getAuth();
+  async getUtils(): Promise<any> {
+    const auth = await this.getAuth();
     
     return {
       // Créer un utilisateur

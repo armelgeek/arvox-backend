@@ -125,8 +125,8 @@ program
       
       // Vérifier les fichiers requis
       const requiredFiles = [
-        './src/infrastructure/database/db/schema.ts',
-        './src/infrastructure/database/db/index.ts',
+        './src/infrastructure/database/schema.ts',
+        './src/infrastructure/database/index.ts',
         './.env',
       ];
 
