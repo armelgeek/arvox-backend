@@ -88,15 +88,15 @@ ${relations}
       case 'postgresql':
         return `import { ${baseImports.join(', ')} } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';`;
-      
+
       case 'mysql':
         return `import { mysqlTable as table, varchar, timestamp, boolean, int } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';`;
-      
+
       case 'sqlite':
         return `import { sqliteTable as table, text, integer } from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';`;
-      
+
       default:
         throw new Error(`Unsupported database provider: ${provider}`);
     }
@@ -326,18 +326,23 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 
     switch (provider) {
       case 'postgresql':
-        return `import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import * as schema from './schema';
+        return `import { env } from 'node:process'
+import dotenv from 'dotenv'
 
-// Create the connection
-const connection = postgres('${url}');
+import { drizzle } from 'drizzle-orm/postgres-js'
+import postgres from 'postgres'
+import * as schema from './schema'
 
-// Create the database instance
-export const db = drizzle(connection, { schema });
+dotenv.config()
+if (!env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is not set')
+}
+export const client = postgres(env.DATABASE_URL)
+export const db = drizzle(client, { schema })
 
-export type Database = typeof db;
-export { schema };`;
+export type Database = typeof db
+export { schema }
+`;
 
       case 'mysql':
         return `import { drizzle } from 'drizzle-orm/mysql2';
@@ -379,21 +384,24 @@ export { schema };`;
   }
 
   getDrizzleConfigContent() {
-    const { provider, url } = this.config.database;
-    
-    return `import type { Config } from 'drizzle-kit';
+    const { provider } = this.config.database;
 
-export default {
-  schema: '${this.config.output.schema}',
-  out: '${this.config.output.migrations}',
-  driver: '${provider}',
+    return `
+    import { defineConfig } from 'drizzle-kit'
+import 'dotenv/config'
+
+export default defineConfig({
+  out: './drizzle',
+  schema: './src/infrastructure/database/schema.ts',
+  dialect: '${provider}',
   dbCredentials: {
-    ${provider === 'sqlite' ? `url: '${url}'` : `connectionString: '${url}'`}
-  },
-  verbose: true,
-  strict: true,
-} satisfies Config;`;
+    // eslint-disable-next-line node/prefer-global/process
+    url: process.env.DATABASE_URL!
   }
+})`;
+  }
+
+
 
   async generateInitialMigration() {
     // Créer un script de migration initiale
@@ -420,7 +428,7 @@ echo "✅ Initial migration completed!"
 
     const migrationPath = join(this.config.output.migrations, 'init.sh');
     await fs.writeFile(migrationPath, migrationScript, 'utf-8');
-    
+
     // Rendre le script exécutable
     await fs.chmod(migrationPath, '755');
   }
