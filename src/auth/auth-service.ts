@@ -188,6 +188,12 @@ export class AuthService extends BaseService {
     };
   }
 
+  async updateLastLogin(userId: string): Promise<void> {
+    // Cette méthode peut être overridée dans les projets pour gérer lastLoginAt
+    // Par défaut, elle ne fait rien car elle dépend du schéma de base de données
+    console.log(`User ${userId} logged in - override updateLastLogin() to track this`);
+  }
+
   async cleanup(): Promise<void> {
     // Cleanup si nécessaire
     this.authInstance = null;

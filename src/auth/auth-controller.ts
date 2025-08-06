@@ -21,9 +21,33 @@ export class AuthController extends BaseController {
     // GET /auth/session
     // GET /auth/reference (documentation)
     // etc.
-    this.controller.all('/auth/*', async (c) => {
-      const handler = await this.authService.getHandler();
-      return handler(c.req.raw);
+    this.controller.on(['POST', 'GET'], '/auth/*', async (c) => {
+      const path = c.req.path;
+      const auth = await this.authService.getAuth();
+      const response = await auth.handler(c.req.raw);
+
+      // Gestion spéciale pour les connexions - mise à jour lastLoginAt
+      if (c.req.method === 'POST' && (path.includes('/auth/sign-in/email') || path.includes('/auth/sign-in/email-otp'))) {
+        try {
+          const body = await response.text();
+          const data = JSON.parse(body);
+
+          if (data?.user?.id) {
+            // Appeler la méthode de mise à jour du service
+            await this.authService.updateLastLogin(data.user.id);
+          }
+
+          return new Response(body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers
+          });
+        } catch (error) {
+          console.error('Failed to process login response:', error);
+        }
+      }
+
+      return response;
     });
 
     // Routes personnalisées pour l'intégration avec l'API
@@ -111,8 +135,17 @@ export class AuthModuleFactory {
     db: DrizzleDB;
     generateSchema?: boolean;
     drizzleConfig?: DrizzleGeneratorConfig;
+    onLogin?: (userId: string, db: DrizzleDB) => Promise<void>; // Callback personnalisé pour la connexion
   }) {
     const authService = new AuthService(config.auth, config.db);
+    
+    // Si un callback de connexion est fourni, l'override
+    if (config.onLogin) {
+      authService.updateLastLogin = async (userId: string) => {
+        await config.onLogin!(userId, config.db);
+      };
+    }
+    
     const authController = new AuthController(authService);
 
     return {
