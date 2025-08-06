@@ -116,13 +116,22 @@ async function generateBasicTemplate(projectDir, projectName) {
 
   // Créer le dossier src, controllers, modules
   await fs.mkdir(path.join(projectDir, 'src'), { recursive: true });
-  await fs.mkdir(path.join(projectDir, 'src', 'controllers'), { recursive: true });
-  await fs.mkdir(path.join(projectDir, 'src', 'modules'), { recursive: true });
+   await fs.mkdir(path.join(projectDir, 'src', 'application', 'services'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'application', 'use-cases'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'domain', 'models'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'domain', 'repositories'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'domain', 'types'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'infrastructure', 'config'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'infrastructure', 'controllers'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'infrastructure', 'database'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'infrastructure', 'middlewares'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'infrastructure', 'repositories'), { recursive: true });
+  await fs.mkdir(path.join(projectDir, 'src', 'infrastructure', 'modules'), { recursive: true });
 
   // index.ts principal
   const indexTs = `import { serve } from '@hono/node-server';
 import { ArvoxFramework } from 'arvox-backend';
-import { HealthModule } from './modules/health.module';
+import { HealthModule } from './infrastructure/modules/health.module';
 
 const app = new ArvoxFramework({
   title: '${projectName} API',
@@ -169,7 +178,7 @@ export class HealthController extends BaseController {
 }
 `;
   await fs.writeFile(
-    path.join(projectDir, 'src', 'controllers', 'health.controller.ts'),
+    path.join(projectDir, 'src', 'infrastructure', 'controllers', 'health.controller.ts'),
     healthController
   );
 
@@ -206,7 +215,7 @@ export class HealthModule implements IModule {
 }
 `;
   await fs.writeFile(
-    path.join(projectDir, 'src', 'modules', 'health.module.ts'),
+    path.join(projectDir, 'src', 'infrastructure', 'modules', 'health.module.ts'),
     healthModule
   );
 
