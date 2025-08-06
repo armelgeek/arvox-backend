@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { DrizzleAuthGenerator } from '../dist/auth/drizzle-generator.js';
+import { DrizzleAuthGenerator } from './drizzle-generator.js';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 

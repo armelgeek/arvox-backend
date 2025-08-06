@@ -1,5 +1,9 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
+import process from 'node:process';
+
+// 'console' is a global object in Node.js, no import needed.
+// If you use a linter and get "'console' is not defined", ensure your linter is configured for Node.js environment.
 
 /**
  * Générateur de schéma Drizzle pour Better Auth
