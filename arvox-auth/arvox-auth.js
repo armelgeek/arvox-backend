@@ -57,14 +57,18 @@ program
 
       // Générer prettier.config.js
       const prettierConfig = `export default {\n  semi: false,\n  trailingComma: 'none',\n  singleQuote: true,\n  printWidth: 120,\n  tabWidth: 2\n}\n`;
-      await fs.writeFile(join(options.output, '../prettier.config.js'), prettierConfig, 'utf-8');
+      await fs.writeFile(join(options.output, '../../prettier.config.js'), prettierConfig, 'utf-8');
 
       // Générer eslint.config.js
       const eslintConfig = `import { config } from '@kolhe/eslint-config'\n\nexport default config(\n  [\n    {\n      files: ['src/**/*.ts'],\n      rules: {\n        'import/no-default-export': 'off'\n      }\n    },\n    {\n      files: ['db/**/*'],\n      rules: {\n        'unicorn/filename-case': 'off',\n        'no-console': 'off'\n      }\n    },\n    {\n      files: ['**/*.test.ts'],\n      rules: {\n        'unicorn/filename-case': 'off',\n        'no-console': 'off',\n        'import/no-default-export': 'off'\n      }\n    }\n  ],\n  {\n    prettier: true,\n    markdown: true,\n    ignorePatterns: ['docs', 'db/**', '.github']\n  }\n)\n`;
-      await fs.writeFile(join(options.output, '../eslint.config.js'), eslintConfig, 'utf-8');
+      await fs.writeFile(join(options.output, '../../eslint.config.js'), eslintConfig, 'utf-8');
+
+      // Générer commitlint.config.js
+      const commitlintConfig = `export default { extends: ['@commitlint/config-conventional'] }\n`;
+      await fs.writeFile(join(options.output, '../../commitlint.config.js'), commitlintConfig, 'utf-8');
 
       // Générer simple-git-hooks dans package.json
-      const pkgPath = join(options.output, '../package.json');
+      const pkgPath = join(options.output, '../../package.json');
       let pkgRaw;
       try {
         pkgRaw = await fs.readFile(pkgPath, 'utf-8');
