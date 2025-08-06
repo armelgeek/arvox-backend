@@ -65,7 +65,7 @@ export class ArvoxFramework {
           robots: 'index, follow',
           description: 'Arvox API is ...'
         },
-        url: process.env.NODE_ENV === 'production' ? 'https://dev-api.meko.ac/swagger' : 'http://localhost:3000/swagger'
+        url: process.env.NODE_ENV === 'production' ? 'https://api.arvox.dev/swagger' : 'http://localhost:3000/swagger'
       })
     );
     
