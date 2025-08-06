@@ -1,6 +1,6 @@
 {
   "name": "arvox-auth",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CLI pour générer une application backend auth Arvox",
   "type": "module",
   "bin": {

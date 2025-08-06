@@ -1,66 +1,14 @@
-# Arvox CLI Tools
 
-Collection d'outils CLI pour le framework Arvox backend.
+# arvox-auth
 
-## 🛠️ CLI disponibles
-
-### 📦 `create-arvox-app` - Générateur de projets
-### 🔐 `arvox-auth` - Générateur d'authentification
-
----
-
-## 📦 create-arvox-app
-
-CLI pour générer une application basée sur le framework Arvox.
-
-### Commandes principales
-
-#### Initialiser un projet
-
-```bash
-npx create-arvox-app init <nom-du-projet> [options]
-```
-
-Ou, si installé globalement :
-
-```bash
-create-arvox-app init <nom-du-projet> [options]
-```
-
-#### Options
-- `-p, --package-manager <pm>` : Gestionnaire de paquets à utiliser (`npm`, `bun`, `pnpm`). Par défaut : `npm`.
-- `--help` : Affiche l'aide de la CLI.
-
-#### Exemple
-```bash
-npx create-arvox-app init mon-api -p pnpm
-```
-
-### Ce que fait la CLI
-
-- Crée un dossier `<nom-du-projet>` avec la structure suivante :
-	- `package.json` (préconfiguré pour arvox-backend)
-	- `tsconfig.json` (TypeScript strict, outDir `dist`)
-	- `src/index.ts` (point d'entrée, serveur prêt à l'emploi)
-	- `src/controllers/health.controller.ts` (contrôleur de santé)
-	- `README.md` (instructions de démarrage)
-- Installe automatiquement les dépendances et devDependencies nécessaires
-- Affiche les prochaines étapes pour démarrer le projet
-
-### Scripts générés
-- `dev` : Démarre le serveur en mode développement (hot reload)
-- `build` : Compile le projet TypeScript
-- `start` : Lance le serveur compilé
-
-### API par défaut
-- `GET /health` : Vérifie l'état du serveur
-- `GET /doc` : Documentation OpenAPI (si activée dans le projet)
-
----
-
-## 🔐 arvox-auth
+> **Note** : Depuis août 2025, le CLI `arvox-auth` fonctionne en pur JavaScript (ES2022), sans dépendance TypeScript pour l'exécution. Assurez-vous d'utiliser Node.js v18+.
 
 CLI pour générer une solution d'authentification complète avec Better Auth + Drizzle ORM.
+
+### ⚡️ Nouveauté : Pure JavaScript
+Le générateur et le CLI sont désormais en JavaScript natif. Vous n'avez plus besoin de compiler TypeScript pour utiliser la CLI.
+
+**Prérequis** : Node.js v18 ou supérieur
 
 ### Commandes principales
 
@@ -121,6 +69,8 @@ db/
 
 .env.example               # Variables d'environnement
 ```
+
+
 
 ### Schéma généré
 
@@ -198,36 +148,38 @@ GET  /api/v1/auth/sign-in/google    # Google OAuth
 
 ## 🚀 Workflow recommandé
 
-### Projet complet avec authentification
+
+### Exemple de workflow
 
 ```bash
-# 1. Créer le projet
-npx create-arvox-app init mon-api-auth
-cd mon-api-auth
-
-# 2. Générer l'authentification
+# 1. Générer l'authentification
 npx arvox-auth generate --social github,google
 
-# 3. Installer les dépendances auth
+# 2. Installer les dépendances auth
 npm install better-auth drizzle-orm postgres
 
-# 4. Configurer les variables
+# 3. Configurer les variables
 cp .env.example .env
 # Éditer .env avec vos vraies valeurs
 
-# 5. Migrations et démarrage
+# 4. Migrations et démarrage
 npx drizzle-kit generate
 npx drizzle-kit push
 npm run dev
 
-# 6. Tester
+# 5. Tester
 curl http://localhost:3000/api/v1/auth/me
 curl http://localhost:3000/docs
 ```
 
-## 📚 Documentation complète
+### 📋 Astuce : Publication npm
+Avant de publier, vérifiez que le dossier `dist/` est bien présent et inclus dans le package. Utilisez le champ `files` dans `package.json` :
 
-- **CLI create-arvox-app** : Documentation dans ce fichier
+```json
+"files": ["dist", "arvox-auth.js"]
+```
+
+## 📚 Documentation complète
 - **CLI arvox-auth** : [docs/arvox-auth-cli.md](../docs/arvox-auth-cli.md)
 - **Framework général** : [README.md](../README.md)
 
