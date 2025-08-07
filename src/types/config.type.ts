@@ -8,6 +8,7 @@ export interface FrameworkConfig {
   version?: string;
   description?: string;
   port?: number;
+  router?: any; // Hono router instance
   environment?: 'development' | 'staging' | 'production';
   serverUrl?: string;
 

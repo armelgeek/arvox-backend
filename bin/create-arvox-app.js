@@ -16,36 +16,209 @@ program
   .command('init <project-name>')
   .description('Créer un nouveau projet')
   .option('-p, --package-manager <pm>', 'Package manager à utiliser (npm, bun, pnpm)', 'npm')
+  .option('--with-auth', 'Générer la configuration auth Better Auth + Drizzle')
   .action(async (projectName, options) => {
-    await createProject(projectName, options.packageManager);
+    await createProject(projectName, options.packageManager, options.withAuth);
   });
 
-async function createProject(projectName, packageManager) {
+async function createProject(projectName, packageManager, withAuth) {
   console.log(`🚀 Création du projet ${projectName}...`);
-  
+
   const projectDir = path.join(process.cwd(), projectName);
-  
+
   try {
     // Créer le répertoire du projet
     await fs.mkdir(projectDir, { recursive: true });
-    
+
     // Générer les fichiers du template
     await generateBasicTemplate(projectDir, projectName);
-    
+
     console.log(`📦 Installation des dépendances avec ${packageManager}...`);
-    
+
     // Installer les dépendances
     await installDependencies(projectDir, packageManager);
-    
+
+
+    // Générer l'authentification si demandé (intégré, plus de dépendance arvox-auth)
+    if (withAuth) {
+      console.log('🔑 Génération de la configuration auth (Better Auth + Drizzle)...');
+      await generateAuthFiles(projectDir);
+    }
+
     console.log(`✅ Projet ${projectName} créé avec succès !`);
     console.log('\n📋 Prochaines étapes :');
     console.log(`   cd ${projectName}`);
     console.log(`   ${packageManager} run dev`);
-    
+
   } catch (error) {
     console.error('❌ Erreur lors de la création du projet :', error.message);
     process.exit(1);
   }
+}
+
+// Génère tous les fichiers nécessaires pour Better Auth + Drizzle
+async function generateAuthFiles(projectDir) {
+  const join = path.join;
+  const dbDir = join(projectDir, 'src', 'infrastructure', 'database');
+  const configDir = join(projectDir, 'src', 'infrastructure', 'config');
+
+  // 1. Générer un schema Drizzle minimal
+  const schemaTs = `import { pgTable, text, boolean, timestamp } from 'drizzle-orm/pg-core';
+
+export const users = pgTable('users', {
+  id: text('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  password: text('password'),
+  firstname: text('firstname'),
+  lastname: text('lastname'),
+  isAdmin: boolean('is_admin').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+export const sessions = pgTable('sessions', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  expiresAt: timestamp('expires_at').notNull()
+});
+
+export const accounts = pgTable('accounts', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  provider: text('provider').notNull(),
+  providerAccountId: text('provider_account_id').notNull()
+});
+
+export const verifications = pgTable('verifications', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  token: text('token').notNull(),
+  expiresAt: timestamp('expires_at').notNull()
+});
+`;
+  await fs.mkdir(dbDir, { recursive: true });
+  await fs.writeFile(join(dbDir, 'schema.ts'), schemaTs, 'utf-8');
+
+  // 2. Générer un client db minimal
+  const dbTs = `import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import * as schema from './schema';
+
+const client = postgres(process.env.DATABASE_URL);
+export const db = drizzle(client, { schema });
+`;
+  await fs.writeFile(join(dbDir, 'db.ts'), dbTs, 'utf-8');
+
+  // 3. Générer le template minimal Better Auth config
+  const authConfigTs = `import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { emailOTP } from 'better-auth/plugins';
+import { Hono } from 'hono';
+import { eq } from 'drizzle-orm';
+import { db } from '../database/db';
+import { users } from '../database/schema';
+
+// Remplacez ceci par votre propre fonction d'envoi d'email OTP
+async function sendOTPEmail(params) {
+  // params: { email, otp }
+  // TODO: Intégrez votre service d'email ici
+}
+
+export const auth = betterAuth({
+  plugins: [
+    emailOTP({
+      expiresIn: 300, // 5 minutes
+      otpLength: 6,
+      async sendVerificationOTP({ email, otp }) {
+        await sendOTPEmail({ email, otp });
+      }
+    })
+  ],
+  database: drizzleAdapter(db, { provider: 'pg' }),
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+    process.env.REACT_APP_URL || 'http://localhost:5173'
+  ],
+  user: {
+    modelName: 'users',
+    additionalFields: {
+      firstname: { type: 'string', default: '', returned: true },
+      lastname: { type: 'string', default: '', returned: true },
+      isAdmin: { type: 'boolean', default: false, returned: true }
+    }
+  },
+  session: {
+    modelName: 'sessions'
+  },
+  account: {
+    modelName: 'accounts'
+  },
+  verification: {
+    modelName: 'verifications'
+  },
+  emailAndPassword: {
+    enabled: true,
+    minPasswordLength: 8,
+    requireEmailVerification: false
+  }
+});
+
+// Router Better Auth avec update lastLoginAt
+const router = new Hono({ strict: false });
+
+router.on(['POST', 'GET'], '/auth/*', async (c) => {
+  const path = c.req.path;
+  const response = await auth.handler(c.req.raw);
+
+  if (
+    c.req.method === 'POST' &&
+    (path === '/api/auth/sign-in/email' || path === '/api/auth/sign-in/email-otp')
+  ) {
+    try {
+      const body = await response.text();
+      const data = JSON.parse(body);
+
+      if (data?.user?.id) {
+        const now = new Date();
+        await db
+          .update(users)
+          .set({
+            lastLoginAt: now,
+            updatedAt: now
+          })
+          .where(eq(users.id, data.user.id))
+          .returning({ lastLoginAt: users.lastLoginAt });
+      }
+
+      return new Response(body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers
+      });
+    } catch (error) {
+      console.error('Failed to update last login date:', error);
+    }
+  }
+
+  return response;
+});
+
+export default router;
+`;
+  await fs.mkdir(configDir, { recursive: true });
+  await fs.writeFile(join(configDir, 'auth.config.ts'), authConfigTs, 'utf-8');
+
+  // 4. Générer un .env.example
+  const envExample = `DATABASE_URL=postgresql://postgres:password@localhost:5432/default_db?search_path=public
+BETTER_AUTH_SECRET=ZAyWnPtauC0eytcpaueedNSvosqAVdDe
+BETTER_AUTH_URL=http://localhost:3000
+NODE_ENV="development"
+REACT_APP_URL=http://localhost:5173
+`;
+  await fs.writeFile(join(projectDir, '.env.example'), envExample, 'utf-8');
+
+  console.log('✅ Auth (Better Auth + Drizzle) généré dans le projet.');
 }
 
 async function generateBasicTemplate(projectDir, projectName) {
@@ -65,6 +238,7 @@ async function generateBasicTemplate(projectDir, projectName) {
       '@hono/node-server': '^1.8.2',
       'drizzle-orm': '^0.43.1',
       'dotenv': '^16.5.0',
+      "better-auth": "^1.2.7",
       'hono': '^4.7.5',
       'postgres': '^3.4.5',
     },
@@ -132,6 +306,7 @@ async function generateBasicTemplate(projectDir, projectName) {
   const indexTs = `import { serve } from '@hono/node-server';
 import { ArvoxFramework } from 'arvox-backend';
 import { HealthModule } from './infrastructure/modules/health.module';
+import {}
 
 const app = new ArvoxFramework({
   appName: '${projectName} API',

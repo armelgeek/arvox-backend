@@ -50,10 +50,73 @@ program
       };
 
       const generator = new DrizzleAuthGenerator(config);
+
       await generator.generateSchema();
-      await generateAuthConfig(options.output, options.authUrl, options.social);
       await generateIntegrationExample(options.output);
       await generateEnvExample(options.social);
+
+      // Générer le template minimal Better Auth config
+      await generateMinimalBetterAuthConfig();
+      // Génère un template minimal Better Auth dans src/infrastructure/config/auth.config.ts
+      async function generateMinimalBetterAuthConfig() {
+        const configPath = 'src/infrastructure/config/auth.config.ts';
+        const content = `import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { emailOTP } from 'better-auth/plugins';
+import { db } from '../database/db';
+
+// Remplacez ceci par votre propre fonction d'envoi d'email OTP
+async function sendOTPEmail({ email, otp }: { email: string; otp: string }) {
+  // TODO: Intégrez votre service d'email ici
+}
+
+export const auth = betterAuth({
+  plugins: [
+    emailOTP({
+      expiresIn: 300, // 5 minutes
+      otpLength: 6,
+      async sendVerificationOTP({ email, otp }) {
+        await sendOTPEmail({ email, otp });
+      }
+    })
+  ],
+  database: drizzleAdapter(db, { provider: 'pg' }),
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+    process.env.REACT_APP_URL || 'http://localhost:5173'
+  ],
+  user: {
+    modelName: 'users',
+    additionalFields: {
+      firstname: { type: 'string', default: '', returned: true },
+      lastname: { type: 'string', default: '', returned: true },
+      isAdmin: { type: 'boolean', default: false, returned: true }
+    }
+  },
+  session: {
+    modelName: 'sessions'
+  },
+  account: {
+    modelName: 'accounts'
+  },
+  verification: {
+    modelName: 'verifications'
+  },
+  emailAndPassword: {
+    enabled: true,
+    minPasswordLength: 8,
+    requireEmailVerification: false
+  }
+});
+`;
+        const { promises: fs } = await import('fs');
+        const { dirname } = await import('path');
+        const dir = dirname(configPath);
+        await fs.mkdir(dir, { recursive: true });
+        await fs.writeFile(configPath, content, 'utf-8');
+        console.log(`✅ Template minimal Better Auth généré dans ${configPath}`);
+      }
 
       // Générer prettier.config.js
       const prettierConfig = `export default {\n  semi: false,\n  trailingComma: 'none',\n  singleQuote: true,\n  printWidth: 120,\n  tabWidth: 2\n}\n`;
@@ -108,7 +171,7 @@ program
       console.log('2. Configurez vos variables d\'environnement (.env)');
       console.log('3. Exécutez les migrations : npm run db:push');
       console.log('4. Intégrez dans votre projet (voir integration-example.ts)');
-      
+
     } catch (error) {
       console.error('❌ Erreur lors de la génération :', error);
       process.exit(1);
@@ -122,7 +185,7 @@ program
   .action(async () => {
     try {
       console.log('🔍 Validation de la configuration...');
-      
+
       // Vérifier les fichiers requis
       const requiredFiles = [
         './src/infrastructure/database/schema.ts',
@@ -146,41 +209,6 @@ program
     }
   });
 
-async function generateAuthConfig(outputPath, authUrl, socialProviders) {
-  const socialConfig = parseSocialProviders(socialProviders);
-  
-  const configContent = `import type { AuthConfig } from 'arvox-backend';
-
-export const authConfig: AuthConfig = {
-  secret: process.env.BETTER_AUTH_SECRET || 'your-secret-key-here',
-  baseURL: process.env.BETTER_AUTH_URL || '${authUrl}',
-  trustedOrigins: ['${authUrl}', 'http://localhost:5173'],
-  
-  database: {
-    provider: 'postgresql', // ou 'mysql', 'sqlite'
-  },
-
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false,
-    minPasswordLength: 8,
-  },
-
-  ${socialConfig.length > 0 ? `socialProviders: {
-${socialConfig.map(provider => `    ${provider}: {
-      clientId: process.env.${provider.toUpperCase()}_CLIENT_ID || '',
-      clientSecret: process.env.${provider.toUpperCase()}_CLIENT_SECRET || '',
-    },`).join('\n')}
-  },` : '// socialProviders: {},'}
-
-  session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 jours
-    updateAge: 60 * 60 * 24, // 1 jour
-  },
-};`;
-
-  await fs.writeFile(join(outputPath, 'auth.config.ts'), configContent, 'utf-8');
-}
 
 async function generateIntegrationExample(outputPath) {
   const exampleContent = `import { ArvoxFramework, AuthModuleFactory } from 'arvox-backend';

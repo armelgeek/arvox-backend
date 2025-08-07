@@ -21,8 +21,7 @@ export class ArvoxFramework {
   constructor(config: FrameworkConfig) {
     this.config = config;
     this.app = new OpenAPIHono();
-  // this.setupOpenAPI();
-  this.initializeSwaggerUI();
+    this.initializeSwaggerUI();
   }
 
   /**
@@ -49,7 +48,7 @@ export class ArvoxFramework {
         ]
       };
     });
-    
+
     // Configuration dynamique pour apiReference
     const apiRefConfig = {
       pageTitle: this.config.apiReference?.pageTitle || 'Arvox API Documentation',
@@ -69,8 +68,6 @@ export class ArvoxFramework {
     };
     this.app.get('/docs', apiReference(apiRefConfig));
 
-    // Enregistrer les routes Better Auth pour la documentation
-    this.setupBetterAuthRoutes();
   }
 
   /**
@@ -84,14 +81,14 @@ export class ArvoxFramework {
     }
 
     const moduleName = module.getName();
-    
+
     if (this.modules.has(moduleName)) {
       throw new Error(`Module '${moduleName}' is already registered`);
     }
 
     this.modules.set(moduleName, module);
     console.log(`Module '${moduleName}' registered`);
-    
+
     return this;
   }
 
@@ -106,14 +103,14 @@ export class ArvoxFramework {
     }
 
     const serviceName = service.getName();
-    
+
     if (this.services.has(serviceName)) {
       throw new Error(`Service '${serviceName}' is already registered`);
     }
 
     this.services.set(serviceName, service);
     console.log(`Service '${serviceName}' registered`);
-    
+
     return this;
   }
 
@@ -180,12 +177,14 @@ export class ArvoxFramework {
         throw error;
       }
     }
+    if (!this.config.router) {
+      this.app.basePath('/api').route('/', this.config.router);
+    }
 
     // Setup global middleware
     this.setupGlobalMiddleware();
 
     // Setup error handling
-    this.setupErrorHandling();
 
     this.isInitialized = true;
     console.log('✓ Arvox Framework initialization complete');
@@ -198,18 +197,18 @@ export class ArvoxFramework {
     // CORS middleware
     if (this.config.cors) {
       this.app.use('*', async (c, next) => {
-        const origin = Array.isArray(this.config.cors?.origin) 
-          ? this.config.cors.origin.join(',') 
+        const origin = Array.isArray(this.config.cors?.origin)
+          ? this.config.cors.origin.join(',')
           : this.config.cors?.origin || '*';
-        
+
         c.header('Access-Control-Allow-Origin', origin);
         c.header('Access-Control-Allow-Methods', this.config.cors?.methods?.join(',') || 'GET,POST,PUT,DELETE,OPTIONS');
         c.header('Access-Control-Allow-Headers', this.config.cors?.headers?.join(',') || 'Content-Type,Authorization');
-        
+
         if (c.req.method === 'OPTIONS') {
           return c.text('', 200);
         }
-        
+
         await next();
       });
     }
@@ -241,7 +240,7 @@ export class ArvoxFramework {
   private setupErrorHandling(): void {
     this.app.onError((error, c) => {
       console.error('Unhandled error:', error);
-      
+
       // Log error details if logging is enabled
       if (this.config.logging?.errors) {
         console.error('Error details:', {
@@ -255,7 +254,7 @@ export class ArvoxFramework {
 
       // Return appropriate error response
       const isDevelopment = this.config.environment === 'development';
-      
+
       return c.json({
         success: false,
         error: isDevelopment ? error.message : 'Internal server error',
@@ -281,17 +280,17 @@ export class ArvoxFramework {
     }
 
     const port = this.config.port || 3000;
-    
+
     return new Promise((resolve) => {
       serve({
         fetch: this.app.fetch,
         port
       });
-      
+
       console.log(`🚀 Arvox Framework server started on port ${port}`);
       console.log(`📚 API Documentation available at http://localhost:${port}/docs`);
       console.log(`📋 OpenAPI spec available at http://localhost:${port}/openapi.json`);
-      
+
       resolve();
     });
   }
@@ -344,9 +343,9 @@ export class ArvoxFramework {
       try {
         serviceHealth[name] = await service.healthCheck();
       } catch (error) {
-        serviceHealth[name] = { 
-          healthy: false, 
-          message: error instanceof Error ? error.message : 'Health check failed' 
+        serviceHealth[name] = {
+          healthy: false,
+          message: error instanceof Error ? error.message : 'Health check failed'
         };
       }
     }
@@ -360,18 +359,18 @@ export class ArvoxFramework {
           moduleHealth[name] = { healthy: true, message: 'No health check implemented' };
         }
       } catch (error) {
-        moduleHealth[name] = { 
-          healthy: false, 
-          message: error instanceof Error ? error.message : 'Health check failed' 
+        moduleHealth[name] = {
+          healthy: false,
+          message: error instanceof Error ? error.message : 'Health check failed'
         };
       }
     }
 
     // Determine overall health
-    const allHealthy = Object.values(serviceHealth).every(h => h.healthy) && 
-                      Object.values(moduleHealth).every(h => h.healthy);
-    const someUnhealthy = Object.values(serviceHealth).some(h => !h.healthy) || 
-                         Object.values(moduleHealth).some(h => !h.healthy);
+    const allHealthy = Object.values(serviceHealth).every(h => h.healthy) &&
+      Object.values(moduleHealth).every(h => h.healthy);
+    const someUnhealthy = Object.values(serviceHealth).some(h => !h.healthy) ||
+      Object.values(moduleHealth).some(h => !h.healthy);
 
     const overall = allHealthy ? 'healthy' : someUnhealthy ? 'degraded' : 'unhealthy';
 
@@ -481,7 +480,7 @@ export class ArvoxFramework {
                     items: { type: 'string' }
                   },
                   services: {
-                    type: 'array', 
+                    type: 'array',
                     items: { type: 'string' }
                   }
                 }
@@ -546,54 +545,5 @@ export class ArvoxFramework {
         }
       });
     });
-  }
-
-  /**
-   * Setup Better Auth routes for documentation
-   */
-  private setupBetterAuthRoutes(): void {
-    // Enregistrer les routes Better Auth pour la documentation avec délégation intelligente
-    this.app.all('/api/v1/auth/*', async (c) => {
-      // Rechercher le service d'authentification
-      const authService = this.getService('AuthService');
-      
-      if (!authService) {
-        // Si pas de service d'auth, retourner une erreur informative
-        return c.json({ 
-          error: 'Authentication service not available',
-          message: 'The authentication service has not been registered with the framework.',
-          availableServices: Array.from(this.services.keys()),
-          hint: 'Make sure to register an AuthService with framework.registerService()'
-        }, 503);
-      }
-
-      try {
-        // Essayer d'obtenir le handler Better Auth du service
-        // @ts-ignore - AuthService aura la méthode getHandler
-        const handler = await authService.getHandler();
-        
-        // Déléguer la requête au handler Better Auth
-        const response = await handler(c.req.raw);
-        
-        // Copier la réponse avec les en-têtes appropriés
-        return new Response(response.body, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: response.headers
-        });
-        
-      } catch (error) {
-        console.error('Better Auth handler error:', error);
-        
-        return c.json({ 
-          error: 'Authentication handler error',
-          message: error instanceof Error ? error.message : 'Unknown authentication error',
-          path: c.req.path,
-          method: c.req.method
-        }, 500);
-      }
-    });
-    
-    console.log('✓ Better Auth reference documentation available at /api/v1/auth/reference');
   }
 }
