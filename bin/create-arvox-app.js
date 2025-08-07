@@ -12,16 +12,16 @@ program
   .description('CLI pour créer des projets avec arvox-backend')
   .version('1.0.0');
 
+
 program
   .command('init <project-name>')
   .description('Créer un nouveau projet')
   .option('-p, --package-manager <pm>', 'Package manager à utiliser (npm, bun, pnpm)', 'npm')
-  .option('--with-auth', 'Générer la configuration auth Better Auth + Drizzle')
   .action(async (projectName, options) => {
-    await createProject(projectName, options.packageManager, options.withAuth);
+    await createProject(projectName, options.packageManager);
   });
 
-async function createProject(projectName, packageManager, withAuth) {
+async function createProject(projectName, packageManager) {
   console.log(`🚀 Création du projet ${projectName}...`);
 
   const projectDir = path.join(process.cwd(), projectName);
@@ -33,17 +33,17 @@ async function createProject(projectName, packageManager, withAuth) {
     // Générer les fichiers du template
     await generateBasicTemplate(projectDir, projectName);
 
+    // Générer les configs de qualité projet (prettier, eslint, commitlint, hooks)
+    await generateProjectConfigs(projectDir, packageManager);
+
+    // Générer auth et schema systématiquement
+    console.log('🔑 Génération de la configuration auth (Better Auth + Drizzle)...');
+    await generateAuthFiles(projectDir);
+
     console.log(`📦 Installation des dépendances avec ${packageManager}...`);
 
     // Installer les dépendances
     await installDependencies(projectDir, packageManager);
-
-
-    // Générer l'authentification si demandé (intégré, plus de dépendance arvox-auth)
-    if (withAuth) {
-      console.log('🔑 Génération de la configuration auth (Better Auth + Drizzle)...');
-      await generateAuthFiles(projectDir);
-    }
 
     console.log(`✅ Projet ${projectName} créé avec succès !`);
     console.log('\n📋 Prochaines étapes :');
@@ -58,6 +58,19 @@ async function createProject(projectName, packageManager, withAuth) {
 
 // Génère tous les fichiers nécessaires pour Better Auth + Drizzle
 async function generateAuthFiles(projectDir) {
+  // Générer drizzle.config.ts à la racine du projet
+  const drizzleConfig = `import type { Config } from 'drizzle-kit';
+
+export default {
+  schema: './src/infrastructure/database/schema.ts',
+  out: './src/infrastructure/database/migrations',
+  driver: 'pg',
+  dbCredentials: {
+    connectionString: process.env.DATABASE_URL || ''
+  }
+} satisfies Config;
+`;
+  await fs.writeFile(path.join(projectDir, 'drizzle.config.ts'), drizzleConfig, 'utf-8');
   const join = path.join;
   const dbDir = join(projectDir, 'src', 'infrastructure', 'database');
   const configDir = join(projectDir, 'src', 'infrastructure', 'config');
@@ -420,6 +433,97 @@ L'API sera disponible sur http://localhost:3000
 - \`npm run start\` : Démarrer en mode production
 `;
   await fs.writeFile(path.join(projectDir, 'README.md'), readme);
+}
+
+// Génère prettier, eslint, commitlint, simple-git-hooks dans le projet
+async function generateProjectConfigs(projectDir, packageManager) {
+  const join = path.join;
+  // prettier.config.js
+  const prettierConfig = `export default {
+  semi: false,
+  trailingComma: 'none',
+  singleQuote: true,
+  printWidth: 120,
+  tabWidth: 2
+}
+`;
+  await fs.writeFile(join(projectDir, 'prettier.config.js'), prettierConfig, 'utf-8');
+
+  // eslint.config.js
+  const eslintConfig = `import { config } from '@kolhe/eslint-config'
+
+export default config(
+  [
+    {
+      files: ['src/**/*.ts'],
+      rules: {
+        'import/no-default-export': 'off'
+      }
+    },
+    {
+      files: ['db/**/*'],
+      rules: {
+        'unicorn/filename-case': 'off',
+        'no-console': 'off'
+      }
+    },
+    {
+      files: ['**/*.test.ts'],
+      rules: {
+        'unicorn/filename-case': 'off',
+        'no-console': 'off',
+        'import/no-default-export': 'off'
+      }
+    }
+  ],
+  {
+    prettier: true,
+    markdown: true,
+    ignorePatterns: ['docs', 'db/**', '.github']
+  }
+)
+`;
+  await fs.writeFile(join(projectDir, 'eslint.config.js'), eslintConfig, 'utf-8');
+
+  // commitlint.config.js
+  const commitlintConfig = `export default { extends: ['@commitlint/config-conventional'] }
+`;
+  await fs.writeFile(join(projectDir, 'commitlint.config.js'), commitlintConfig, 'utf-8');
+
+  // Ajout simple-git-hooks et scripts dans package.json
+  const pkgPath = join(projectDir, 'package.json');
+  let pkgRaw;
+  try {
+    pkgRaw = await fs.readFile(pkgPath, 'utf-8');
+  } catch {
+    pkgRaw = null;
+  }
+  if (pkgRaw) {
+    const pkg = JSON.parse(pkgRaw);
+    // Scripts adaptés au gestionnaire de paquets
+    const pm = packageManager;
+    pkg.scripts = {
+      ...pkg.scripts,
+      build: 'tsc --noEmitOnError false && tsc-alias',
+      format: `${pm} run prettier --write "./**/*.{js,ts,json}"`,
+      lint: `${pm} run eslint .`,
+      'lint:fix': `${pm} run lint --fix`,
+      'db:generate': `${pm} run drizzle-kit generate`,
+      'db:check': 'npx drizzle-kit check',
+      'db:migrate': 'tsx ./db/migrate.ts',
+      'db:studio': `${pm} run drizzle-kit studio`,
+      'db:push': `${pm} run drizzle-kit push`,
+      'db:drop': 'tsx ./db/reset.ts',
+      'db:seed': `${pm} run ./db/seed.js`,
+      'db:reset': 'tsx ./db/reset.ts',
+      'db:update': `${pm} run db:generate && ${pm} run db:migrate`
+    };
+    pkg['simple-git-hooks'] = {
+      'pre-commit': `${pm} run lint && ${pm} run format`,
+      'commit-msg': `${pm} run commitlint --edit $1`
+    };
+    await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2), 'utf-8');
+  }
 }
 
 function installDependencies(projectDir, packageManager) {
