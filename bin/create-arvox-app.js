@@ -306,12 +306,13 @@ async function generateBasicTemplate(projectDir, projectName) {
   const indexTs = `import { serve } from '@hono/node-server';
 import { ArvoxFramework } from 'arvox-backend';
 import { HealthModule } from './infrastructure/modules/health.module';
-import {}
+import router from './infrastructure/config/auth.config';
 
 const app = new ArvoxFramework({
   appName: '${projectName} API',
   version: '1.0.0',
-  description: 'API créée avec arvox-backend'
+  description: 'API créée avec arvox-backend',
+  router, // Utiliser le router Better Auth
 });
 
 // Enregistrer le module Health
