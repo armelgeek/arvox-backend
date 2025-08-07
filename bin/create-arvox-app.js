@@ -234,7 +234,7 @@ async function generateBasicTemplate(projectDir, projectName) {
       start: 'node dist/index.js',
       },
     dependencies: {
-      'arvox-backend': '^1.0.5',
+      'arvox-backend': '^1.1.6',
       '@hono/node-server': '^1.8.2',
       'drizzle-orm': '^0.43.1',
       'dotenv': '^16.5.0',
